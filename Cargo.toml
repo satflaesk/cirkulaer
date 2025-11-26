@@ -1,0 +1,15 @@
+[lints.clippy]
+all = "deny"
+cargo = "deny"
+nursery = "deny"
+pedantic = "deny"
+
+[package]
+categories = ["rust-patterns"]
+description = "Provides a circular index type."
+edition = "2024"
+keywords = ["array", "circular", "index", "indices"]
+license = "MIT OR Apache-2.0"
+name = "cirkulaer"
+repository = "https://github.com/satflaesk/cirkulaer"
+version = "0.1.0"
