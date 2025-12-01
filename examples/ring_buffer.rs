@@ -1,7 +1,7 @@
 #![allow(incomplete_features)]
 #![feature(generic_const_exprs)]
 
-use cirkulaer::{is_strictly_positive, Bool, CircularIndex, True};
+use cirkulaer::{Bool, CircularIndex, True, is_strictly_positive};
 
 pub struct RingBuffer<T, const CAPACITY: usize>
 where
