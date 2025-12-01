@@ -1,4 +1,4 @@
-use cirkulaer::{is_strictly_positive, CircularIndex};
+use cirkulaer::{CircularIndex, is_strictly_positive};
 
 #[test]
 fn zero_is_not_strictly_positive() {
