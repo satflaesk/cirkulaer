@@ -15,6 +15,5 @@ fn main() {
 
     ci += 3;
     array[ci] = 8;
-
     assert_eq!(array, [2, 0, 8, 0, 4]);
 }
