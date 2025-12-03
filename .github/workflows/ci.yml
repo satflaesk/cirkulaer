@@ -19,9 +19,9 @@ jobs:
     name: Check coverage
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: taiki-e/install-action@cargo-llvm-cov
-      - run: ./scripts/check-coverage.sh --verbose
+    - uses: actions/checkout@v5
+    - uses: taiki-e/install-action@cargo-llvm-cov
+    - run: ./scripts/check-coverage.sh --verbose
 
   check-example-in-readme-file:
     name: Check example in README file
