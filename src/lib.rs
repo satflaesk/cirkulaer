@@ -4,7 +4,7 @@
 //! Provides a circular index type suitable for indexing into primitive arrays
 //! in a circular, automatically wrapping manner:
 //!
-//! ```
+//! ```rust
 #![doc = include_str!("../examples/basic.rs")]
 //! ```
 
@@ -24,7 +24,7 @@ impl True for Bool<true> {}
 ///
 /// # Examples
 ///
-/// ```
+/// ```rust
 /// # fn main() {
 /// # use cirkulaer::is_strictly_positive;
 /// assert!(!is_strictly_positive(0));
@@ -48,7 +48,7 @@ pub const fn is_strictly_positive(number: usize) -> bool {
 /// trait bound. Consequently, user code that parameterizes `CircularIndex` by
 /// its modulus must repeat this exact trait bound:
 ///
-/// ```
+/// ```rust
 /// #![allow(incomplete_features)]
 /// #![feature(generic_const_exprs)]
 ///
@@ -75,7 +75,7 @@ pub const fn is_strictly_positive(number: usize) -> bool {
 ///
 /// Instances automatically wrap around and are guaranteed to stay within range:
 ///
-/// ```
+/// ```rust
 /// # fn main() {
 /// # use cirkulaer::CircularIndex;
 /// const CAPACITY: usize = 3;
@@ -97,7 +97,7 @@ pub const fn is_strictly_positive(number: usize) -> bool {
 ///
 /// Addition and subtraction operations are guaranteed to not overflow:
 ///
-/// ```
+/// ```rust
 /// # fn main() {
 /// # use cirkulaer::CircularIndex;
 /// let mut ci = CircularIndex::<{ usize::MAX }>::new(7);
@@ -112,7 +112,7 @@ pub const fn is_strictly_positive(number: usize) -> bool {
 ///
 /// If the modulus does not equal the array capacity, compilation fails:
 ///
-/// ```compile_fail
+/// ```rust,compile_fail
 /// # fn main() {
 /// # use cirkulaer::CircularIndex;
 /// let array = [1, 2, 3, 4];
@@ -124,7 +124,7 @@ pub const fn is_strictly_positive(number: usize) -> bool {
 ///
 /// If the modulus is zero, compilation fails:
 ///
-/// ```compile_fail
+/// ```rust,compile_fail
 /// # fn main() {
 /// # use cirkulaer::CircularIndex;
 /// let size = std::mem::size_of::<CircularIndex::<0>>(); // Fails to compile.
@@ -146,7 +146,7 @@ where
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```rust
     /// # fn main() {
     /// # use cirkulaer::CircularIndex;
     /// assert_eq!(CircularIndex::<8>::MODULUS, 8);
@@ -161,7 +161,7 @@ where
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```rust
     /// # fn main() {
     /// # use cirkulaer::CircularIndex;
     /// let ci = CircularIndex::<4>::new(1);
@@ -188,7 +188,7 @@ where
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```rust
     /// # fn main() {
     /// # use cirkulaer::CircularIndex;
     /// let ci = CircularIndex::<4>::new(2);
