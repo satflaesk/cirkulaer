@@ -8,67 +8,63 @@ env:
   RUSTFLAGS: -Dwarnings
 
 jobs:
-  build:
-    name: Build
+  build-all-targets:
+    name: Build all targets
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - run: cargo build --all-targets --verbose
+    - run: ./scripts/build-all-targets.sh --verbose
 
-  clippy:
-    name: Clippy
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - run: rustup component add clippy
-    - run: cargo clippy
-
-  coverage:
-    name: Coverage
+  check-coverage:
+    name: Check coverage
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
       - uses: taiki-e/install-action@cargo-llvm-cov
-      - run: cargo llvm-cov --branch --fail-uncovered-lines 0 --show-missing-lines
+      - run: ./scripts/check-coverage.sh --verbose
 
-  documentation:
-    name: Documentation
+  check-example-in-readme-file:
+    name: Check example in README file
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - run: ./scripts/check-example-in-readme-file.sh
+
+  check-formatting:
+    name: Check formatting
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - run: rustup component add rustfmt
+    - run: ./scripts/check-formatting.sh --verbose
+
+  generate-documentation:
+    name: Generate documentation
     runs-on: ubuntu-latest
     env:
       RUSTDOCFLAGS: -Dwarnings
     steps:
     - uses: actions/checkout@v4
-    - run: cargo doc --verbose
+    - run: ./scripts/generate-documentation.sh --verbose
 
-  examples:
-    name: Examples
+  run-all-examples:
+    name: Run all examples
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - run: cargo run --example basic --verbose
-    - run: cargo run --example ring_buffer --verbose
+    - run: ./scripts/run-all-examples.sh --verbose
 
-  formatting:
-    name: Formatting
+  run-all-tests:
+    name: Run all tests
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - run: rustup component add rustfmt
-    - run: cargo fmt -- --check
+    - run: ./scripts/run-all-tests.sh --verbose
 
-  readme:
-    name: README.md
+  run-clippy:
+    name: Run Clippy
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - run: cat <(echo '```rust') examples/basic.rs > tmp
-    - run: echo '```' >> tmp
-    - run: tail -$(cat tmp | wc -l) README.md | diff - tmp
-    - run: rm tmp
-
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - run: cargo test --verbose
+    - run: rustup component add clippy
+    - run: ./scripts/run-clippy.sh
