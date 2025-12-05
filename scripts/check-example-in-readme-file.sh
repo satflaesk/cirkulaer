@@ -2,6 +2,9 @@
 
 set -eoux pipefail;
 
+repo_root=$(git rev-parse --show-toplevel);
+pushd "${repo_root}";
+
 expected_tail_of_readme_file=$(mktemp --suffix=.expected);
 cat <(printf '```rust\n') examples/basic.rs <(printf '```\n') >> "${expected_tail_of_readme_file}";
 
@@ -12,3 +15,5 @@ tail -"${num_lines_in_expected_tail}" README.md >> "${actual_tail_of_readme_file
 diff "${expected_tail_of_readme_file}" "${actual_tail_of_readme_file}";
 
 rm "${expected_tail_of_readme_file}" "${actual_tail_of_readme_file}";
+
+popd;
