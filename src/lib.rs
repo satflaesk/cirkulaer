@@ -36,107 +36,171 @@ pub const fn is_strictly_positive(number: usize) -> bool {
     number >= 1
 }
 
-/// A circular index type suitable for indexing into primitive arrays in a
-/// circular, automatically wrapping manner.
-///
-/// In modular arithmetic, _n_ in _a (mod n)_ is referred to as the _modulus_;
-/// hence the name of the `MODULUS` const-generic argument.
-///
-/// To help enforce that the modulus is strictly positive at compile time, the
-/// unstable `generic_const_exprs` feature is used; this enables enforcing
-/// strict positivity with a `Bool<{ is_strictly_positive(MODULUS) }>: True`
-/// trait bound. Consequently, user code that parameterizes `CircularIndex` by
-/// its modulus must repeat this exact trait bound:
-///
-/// ```rust
-/// #![allow(incomplete_features)]
-/// #![feature(generic_const_exprs)]
-///
-/// use cirkulaer::{Bool, CircularIndex, True, is_strictly_positive};
-///
-/// pub struct RingBuffer<T, const CAPACITY: usize>
-/// where
-///     Bool<{ is_strictly_positive(CAPACITY) }>: True,
-/// {
-///     buffer: [Option<T>; CAPACITY],
-///     index_of_next: CircularIndex<CAPACITY>,
-///     index_of_oldest: CircularIndex<CAPACITY>,
-/// }
-///
-/// impl<T, const CAPACITY: usize> RingBuffer<T, CAPACITY>
-/// where
-///     Bool<{ is_strictly_positive(CAPACITY) }>: True,
-/// {
-///     // ...
-/// }
-/// ```
-///
-/// # Examples
-///
-/// Instances automatically wrap around and are guaranteed to stay within range:
-///
-/// ```rust
-/// # fn main() {
-/// # use cirkulaer::CircularIndex;
-/// const CAPACITY: usize = 3;
-///
-/// let mut array = [0; CAPACITY];
-/// let mut ci = CircularIndex::<CAPACITY>::new(0);
-///
-/// array[ci] += 1;
-/// ci += 1;
-/// array[ci] += 2;
-/// ci += 1;
-/// array[ci] += 3;
-/// ci += 1;
-/// array[ci] += 4;
-///
-/// assert_eq!(array, [5, 2, 3]);
-/// # }
-/// ```
-///
-/// Addition and subtraction operations are guaranteed to not overflow:
-///
-/// ```rust
-/// # fn main() {
-/// # use cirkulaer::CircularIndex;
-/// let mut ci = CircularIndex::<{ usize::MAX }>::new(7);
-///
-/// ci += usize::MAX;
-/// assert_eq!(ci.get(), 7);
-///
-/// ci -= usize::MAX;
-/// assert_eq!(ci.get(), 7);
-/// # }
-/// ```
-///
-/// If the modulus does not equal the array capacity, compilation fails:
-///
-/// ```rust,compile_fail
-/// # fn main() {
-/// # use cirkulaer::CircularIndex;
-/// let array = [1, 2, 3, 4];
-/// let ci = CircularIndex::<5>::new(0);
-///
-/// let element = array[ci]; // Fails to compile.
-/// # }
-/// ```
-///
-/// If the modulus is zero, compilation fails:
-///
-/// ```rust,compile_fail
-/// # fn main() {
-/// # use cirkulaer::CircularIndex;
-/// let size = std::mem::size_of::<CircularIndex::<0>>(); // Fails to compile.
-/// # }
-/// ```
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct CircularIndex<const MODULUS: usize>
-where
-    Bool<{ is_strictly_positive(MODULUS) }>: True,
-{
-    value: usize,
+mod inner {
+    use super::{Bool, True, is_strictly_positive};
+
+    /// A circular index type suitable for indexing into primitive arrays in a
+    /// circular, automatically wrapping manner.
+    ///
+    /// In modular arithmetic, _n_ in _a (mod n)_ is referred to as the
+    /// _modulus_; hence the name of the `MODULUS` const-generic argument.
+    ///
+    /// To help enforce that the modulus is strictly positive at compile time,
+    /// the unstable `generic_const_exprs` feature is used; this enables
+    /// enforcing strict positivity with a `Bool<{
+    /// is_strictly_positive(MODULUS) }>: True` trait bound. Consequently,
+    /// user code that parameterizes `CircularIndex` by its modulus must
+    /// repeat this exact trait bound:
+    ///
+    /// ```rust
+    /// #![allow(incomplete_features)]
+    /// #![feature(generic_const_exprs)]
+    ///
+    /// use cirkulaer::{Bool, CircularIndex, True, is_strictly_positive};
+    ///
+    /// pub struct RingBuffer<T, const CAPACITY: usize>
+    /// where
+    ///     Bool<{ is_strictly_positive(CAPACITY) }>: True,
+    /// {
+    ///     buffer: [Option<T>; CAPACITY],
+    ///     index_of_next: CircularIndex<CAPACITY>,
+    ///     index_of_oldest: CircularIndex<CAPACITY>,
+    /// }
+    ///
+    /// impl<T, const CAPACITY: usize> RingBuffer<T, CAPACITY>
+    /// where
+    ///     Bool<{ is_strictly_positive(CAPACITY) }>: True,
+    /// {
+    ///     // ...
+    /// }
+    /// ```
+    ///
+    /// # Examples
+    ///
+    /// Instances automatically wrap around and are guaranteed to stay within
+    /// range:
+    ///
+    /// ```rust
+    /// # fn main() {
+    /// # use cirkulaer::CircularIndex;
+    /// const CAPACITY: usize = 3;
+    ///
+    /// let mut array = [0; CAPACITY];
+    /// let mut ci = CircularIndex::<CAPACITY>::new(0);
+    ///
+    /// array[ci] += 1;
+    /// ci += 1;
+    /// array[ci] += 2;
+    /// ci += 1;
+    /// array[ci] += 3;
+    /// ci += 1;
+    /// array[ci] += 4;
+    ///
+    /// assert_eq!(array, [5, 2, 3]);
+    /// # }
+    /// ```
+    ///
+    /// Addition and subtraction operations are guaranteed to not overflow:
+    ///
+    /// ```rust
+    /// # fn main() {
+    /// # use cirkulaer::CircularIndex;
+    /// let mut ci = CircularIndex::<{ usize::MAX }>::new(7);
+    ///
+    /// ci += usize::MAX;
+    /// assert_eq!(ci.get(), 7);
+    ///
+    /// ci -= usize::MAX;
+    /// assert_eq!(ci.get(), 7);
+    /// # }
+    /// ```
+    ///
+    /// If the modulus does not equal the array capacity, compilation fails:
+    ///
+    /// ```rust,compile_fail
+    /// # fn main() {
+    /// # use cirkulaer::CircularIndex;
+    /// let array = [1, 2, 3, 4];
+    /// let ci = CircularIndex::<5>::new(0);
+    ///
+    /// let element = array[ci]; // Fails to compile.
+    /// # }
+    /// ```
+    ///
+    /// If the modulus is zero, compilation fails:
+    ///
+    /// ```rust,compile_fail
+    /// # fn main() {
+    /// # use cirkulaer::CircularIndex;
+    /// let size = std::mem::size_of::<CircularIndex::<0>>(); // Fails to compile.
+    /// # }
+    /// ```
+    #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    pub struct CircularIndex<const MODULUS: usize>
+    where
+        Bool<{ is_strictly_positive(MODULUS) }>: True,
+    {
+        value: usize,
+        _seal: Seal,
+    }
+
+    #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    struct Seal;
+
+    impl<const MODULUS: usize> CircularIndex<MODULUS>
+    where
+        Bool<{ is_strictly_positive(MODULUS) }>: True,
+    {
+        /// Create a new instance.
+        ///
+        /// If `value` is greater than or equal to [`Self::MODULUS`], it will be
+        /// wrapped accordingly.
+        ///
+        /// # Examples
+        ///
+        /// ```rust
+        /// # fn main() {
+        /// # use cirkulaer::CircularIndex;
+        /// let ci = CircularIndex::<4>::new(1);
+        /// assert_eq!(ci.get(), 1);
+        ///
+        /// let ci = CircularIndex::<7>::new(7);
+        /// assert_eq!(ci.get(), 0);
+        ///
+        /// let ci = CircularIndex::<5>::new(8);
+        /// assert_eq!(ci.get(), 3);
+        ///
+        /// let ci = CircularIndex::<6>::new(60);
+        /// assert_eq!(ci.get(), 0);
+        /// # }
+        /// ```
+        #[must_use]
+        pub const fn new(value: usize) -> Self {
+            Self {
+                value: value % MODULUS,
+                _seal: Seal,
+            }
+        }
+
+        /// Return the contained index as a primitive type.
+        ///
+        /// # Examples
+        ///
+        /// ```rust
+        /// # fn main() {
+        /// # use cirkulaer::CircularIndex;
+        /// let ci = CircularIndex::<4>::new(2);
+        /// assert_eq!(ci.get(), 2);
+        /// # }
+        /// ```
+        #[must_use]
+        pub const fn get(self) -> usize {
+            self.value
+        }
+    }
 }
+
+pub use inner::CircularIndex;
 
 impl<const MODULUS: usize> CircularIndex<MODULUS>
 where
@@ -153,52 +217,6 @@ where
     /// # }
     /// ```
     pub const MODULUS: usize = MODULUS;
-
-    /// Create a new instance.
-    ///
-    /// If `value` is greater than or equal to [`Self::MODULUS`], it will be
-    /// wrapped accordingly.
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// # fn main() {
-    /// # use cirkulaer::CircularIndex;
-    /// let ci = CircularIndex::<4>::new(1);
-    /// assert_eq!(ci.get(), 1);
-    ///
-    /// let ci = CircularIndex::<7>::new(7);
-    /// assert_eq!(ci.get(), 0);
-    ///
-    /// let ci = CircularIndex::<5>::new(8);
-    /// assert_eq!(ci.get(), 3);
-    ///
-    /// let ci = CircularIndex::<6>::new(60);
-    /// assert_eq!(ci.get(), 0);
-    /// # }
-    /// ```
-    #[must_use]
-    pub const fn new(value: usize) -> Self {
-        Self {
-            value: value % MODULUS,
-        }
-    }
-
-    /// Return the contained index as a primitive type.
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// # fn main() {
-    /// # use cirkulaer::CircularIndex;
-    /// let ci = CircularIndex::<4>::new(2);
-    /// assert_eq!(ci.get(), 2);
-    /// # }
-    /// ```
-    #[must_use]
-    pub const fn get(self) -> usize {
-        self.value
-    }
 }
 
 impl<const MODULUS: usize> From<usize> for CircularIndex<MODULUS>
@@ -218,15 +236,15 @@ where
 
     fn add(self, rhs: usize) -> Self::Output {
         let rhs = rhs % MODULUS;
-        let min_rhs_that_entails_wrapping = MODULUS - self.value;
+        let min_rhs_that_entails_wrapping = MODULUS - self.get();
 
         let value = if rhs < min_rhs_that_entails_wrapping {
-            self.value + rhs
+            self.get() + rhs
         } else {
             rhs - min_rhs_that_entails_wrapping
         };
 
-        Self { value }
+        Self::new(value)
     }
 }
 
@@ -499,7 +517,7 @@ where
         write!(
             f,
             "{value} (mod {modulus})",
-            value = self.value,
+            value = self.get(),
             modulus = MODULUS,
         )
     }
