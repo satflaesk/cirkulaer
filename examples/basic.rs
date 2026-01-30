@@ -4,7 +4,7 @@ fn main() {
     const CAPACITY: usize = 5;
 
     let mut array = [0; CAPACITY];
-    let mut ci = CircularIndex::<CAPACITY>::new(0);
+    let mut ci = CircularIndex::<CAPACITY>::new(0).unwrap();
 
     array[ci] = 2;
     assert_eq!(array, [2, 0, 0, 0, 0]);
