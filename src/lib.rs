@@ -36,8 +36,127 @@ pub const fn is_strictly_positive(number: usize) -> bool {
     number >= 1
 }
 
+/// An error type to communicate that an attempt to construct a circular index
+/// failed as a result of the provided value not being strictly lesser than the
+/// circular index's modulus.
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub struct ValueError {
+    modulus: std::num::NonZeroUsize,
+    value: usize,
+}
+
+impl std::fmt::Display for ValueError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(
+            f,
+            "Cannot create a circular index with a modulus of {modulus} from a value of {value}",
+            modulus = self.modulus,
+            value = self.value,
+        )
+    }
+}
+
+impl std::error::Error for ValueError {}
+
+#[cfg(test)]
+mod value_error_tests {
+    use super::ValueError;
+
+    #[test]
+    fn derives_clone() {
+        fn f<T: Clone>(_: T) {}
+        let e = ValueError {
+            modulus: std::num::NonZeroUsize::new(2).unwrap(),
+            value: 3,
+        };
+
+        f(e);
+    }
+
+    #[test]
+    fn derives_copy() {
+        fn f<T: Copy>(_: T) {}
+        let e = ValueError {
+            modulus: std::num::NonZeroUsize::new(5).unwrap(),
+            value: 9,
+        };
+
+        f(e);
+    }
+
+    #[test]
+    fn derives_debug() {
+        fn f<T: std::fmt::Debug>(_: T) {}
+        let e = ValueError {
+            modulus: std::num::NonZeroUsize::new(4).unwrap(),
+            value: 4,
+        };
+
+        f(e);
+    }
+
+    #[test]
+    fn derives_eq() {
+        fn f<T: Eq>(_: T) {}
+        let e = ValueError {
+            modulus: std::num::NonZeroUsize::new(6).unwrap(),
+            value: 8,
+        };
+
+        f(e);
+    }
+
+    #[test]
+    fn derives_hash() {
+        fn f<T: std::hash::Hash>(_: T) {}
+        let e = ValueError {
+            modulus: std::num::NonZeroUsize::new(3).unwrap(),
+            value: 3,
+        };
+
+        f(e);
+    }
+
+    #[test]
+    fn derives_partial_eq() {
+        fn f<T: PartialEq>(_: T) {}
+        let e = ValueError {
+            modulus: std::num::NonZeroUsize::new(7).unwrap(),
+            value: 9,
+        };
+
+        f(e);
+    }
+
+    #[test]
+    fn the_display_trait_implementation_works_as_intended() {
+        let e = ValueError {
+            modulus: std::num::NonZeroUsize::new(4).unwrap(),
+            value: 5,
+        };
+
+        let s = e.to_string();
+
+        assert_eq!(
+            s,
+            "Cannot create a circular index with a modulus of 4 from a value of 5"
+        );
+    }
+
+    #[test]
+    fn implements_std_error_error() {
+        fn f<T: std::error::Error>(_: T) {}
+        let e = ValueError {
+            modulus: std::num::NonZeroUsize::new(3).unwrap(),
+            value: 7,
+        };
+
+        f(e);
+    }
+}
+
 mod inner {
-    use super::{Bool, True, is_strictly_positive};
+    use super::{Bool, True, ValueError, is_strictly_positive};
 
     /// A circular index type suitable for indexing into primitive arrays in a
     /// circular, automatically wrapping manner.
@@ -86,7 +205,7 @@ mod inner {
     /// const CAPACITY: usize = 3;
     ///
     /// let mut array = [0; CAPACITY];
-    /// let mut ci = CircularIndex::<CAPACITY>::new(0);
+    /// let mut ci = CircularIndex::<CAPACITY>::new(0).unwrap();
     ///
     /// array[ci] += 1;
     /// ci += 1;
@@ -105,7 +224,7 @@ mod inner {
     /// ```rust
     /// # fn main() {
     /// # use cirkulaer::CircularIndex;
-    /// let mut ci = CircularIndex::<{ usize::MAX }>::new(7);
+    /// let mut ci = CircularIndex::<{ usize::MAX }>::new(7).unwrap();
     ///
     /// ci += usize::MAX;
     /// assert_eq!(ci.get(), 7);
@@ -151,10 +270,7 @@ mod inner {
     where
         Bool<{ is_strictly_positive(MODULUS) }>: True,
     {
-        /// Create a new instance.
-        ///
-        /// If `value` is greater than or equal to [`Self::MODULUS`], it will be
-        /// wrapped accordingly.
+        /// Attempt to create a new instance.
         ///
         /// # Examples
         ///
@@ -162,24 +278,31 @@ mod inner {
         /// # fn main() {
         /// # use cirkulaer::CircularIndex;
         /// let ci = CircularIndex::<4>::new(1);
-        /// assert_eq!(ci.get(), 1);
+        /// assert!(ci.is_ok());
+        /// assert_eq!(ci.unwrap().get(), 1);
         ///
-        /// let ci = CircularIndex::<7>::new(7);
-        /// assert_eq!(ci.get(), 0);
+        /// let ci = CircularIndex::<5>::new(5);
+        /// assert!(ci.is_err());
         ///
-        /// let ci = CircularIndex::<5>::new(8);
-        /// assert_eq!(ci.get(), 3);
-        ///
-        /// let ci = CircularIndex::<6>::new(60);
-        /// assert_eq!(ci.get(), 0);
+        /// let ci = CircularIndex::<8>::new(9);
+        /// assert!(ci.is_err());
         /// # }
         /// ```
-        #[must_use]
-        pub const fn new(value: usize) -> Self {
-            Self {
-                value: value % MODULUS,
-                _seal: Seal,
+        ///
+        /// # Errors
+        ///
+        /// Returns [`ValueError`] if `value` is not strictly lesser than
+        /// [`Self::MODULUS`].
+        pub const fn new(value: usize) -> Result<Self, ValueError> {
+            if value >= MODULUS {
+                return Err(ValueError {
+                    // SAFETY: Thanks to the trait bound, `MODULUS` is guaranteed to be non-zero.
+                    modulus: unsafe { std::num::NonZeroUsize::new_unchecked(MODULUS) },
+                    value,
+                });
             }
+
+            Ok(Self { value, _seal: Seal })
         }
 
         /// Return the contained index as a primitive type.
@@ -189,7 +312,7 @@ mod inner {
         /// ```rust
         /// # fn main() {
         /// # use cirkulaer::CircularIndex;
-        /// let ci = CircularIndex::<4>::new(2);
+        /// let ci = CircularIndex::<4>::new(2).unwrap();
         /// assert_eq!(ci.get(), 2);
         /// # }
         /// ```
@@ -219,11 +342,13 @@ where
     pub const MODULUS: usize = MODULUS;
 }
 
-impl<const MODULUS: usize> From<usize> for CircularIndex<MODULUS>
+impl<const MODULUS: usize> TryFrom<usize> for CircularIndex<MODULUS>
 where
     Bool<{ is_strictly_positive(MODULUS) }>: True,
 {
-    fn from(value: usize) -> Self {
+    type Error = ValueError;
+
+    fn try_from(value: usize) -> Result<Self, Self::Error> {
         Self::new(value)
     }
 }
@@ -244,7 +369,8 @@ where
             rhs - min_rhs_that_entails_wrapping
         };
 
-        Self::new(value)
+        // TODO: Add `new_unchecked` and use it here.
+        Self::new(value).unwrap()
     }
 }
 
@@ -494,7 +620,7 @@ where
     type Output = T;
 
     fn index(&self, index: CircularIndex<MODULUS>) -> &Self::Output {
-        // TODO: The array could be indexed unchecked.
+        // TODO: The indexing could be unchecked.
         &self[index.get()]
     }
 }
@@ -504,7 +630,7 @@ where
     Bool<{ is_strictly_positive(MODULUS) }>: True,
 {
     fn index_mut(&mut self, index: CircularIndex<MODULUS>) -> &mut Self::Output {
-        // TODO: The array could be indexed unchecked.
+        // TODO: The indexing could be unchecked.
         &mut self[index.get()]
     }
 }
@@ -524,70 +650,70 @@ where
 }
 
 #[cfg(test)]
-mod tests {
+mod circular_index_tests {
     use super::*;
 
     #[test]
     fn derives_clone() {
         fn f<T: Clone>(_: T) {}
 
-        f(CircularIndex::<7>::new(3));
+        f(CircularIndex::<7>::new(3).unwrap());
     }
 
     #[test]
     fn derives_copy() {
         fn f<T: Copy>(_: T) {}
 
-        f(CircularIndex::<4>::new(2));
+        f(CircularIndex::<4>::new(2).unwrap());
     }
 
     #[test]
     fn derives_debug() {
         fn f<T: std::fmt::Debug>(_: T) {}
 
-        f(CircularIndex::<6>::new(0));
+        f(CircularIndex::<6>::new(0).unwrap());
     }
 
     #[test]
     fn derives_default() {
         fn f<T: Default>(_: T) {}
 
-        f(CircularIndex::<8>::new(5));
+        f(CircularIndex::<8>::new(5).unwrap());
     }
 
     #[test]
     fn derives_eq() {
         fn f<T: Eq>(_: T) {}
 
-        f(CircularIndex::<7>::new(1));
+        f(CircularIndex::<7>::new(1).unwrap());
     }
 
     #[test]
     fn derives_hash() {
         fn f<T: std::hash::Hash>(_: T) {}
 
-        f(CircularIndex::<4>::new(1));
+        f(CircularIndex::<4>::new(1).unwrap());
     }
 
     #[test]
     fn derives_ord() {
         fn f<T: Ord>(_: T) {}
 
-        f(CircularIndex::<7>::new(3));
+        f(CircularIndex::<7>::new(3).unwrap());
     }
 
     #[test]
     fn derives_partial_eq() {
         fn f<T: PartialEq>(_: T) {}
 
-        f(CircularIndex::<4>::new(2));
+        f(CircularIndex::<4>::new(2).unwrap());
     }
 
     #[test]
     fn derives_partial_ord() {
         fn f<T: PartialOrd>(_: T) {}
 
-        f(CircularIndex::<5>::new(2));
+        f(CircularIndex::<5>::new(2).unwrap());
     }
 
     #[test]
@@ -608,7 +734,7 @@ mod tests {
 
     #[test]
     fn the_display_trait_implementation_works_as_intended() {
-        let i = CircularIndex::<5>::new(3);
+        let i = CircularIndex::<5>::new(3).unwrap();
 
         assert_eq!(i.to_string(), "3 (mod 5)");
     }
