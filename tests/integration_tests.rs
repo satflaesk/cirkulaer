@@ -62,12 +62,12 @@ fn is_orderable() {
 }
 
 #[test]
-fn the_associated_constant_equals_the_modulus() {
-    assert_eq!(CircularIndex::<2>::MODULUS, 2);
+fn the_associated_constant_equals_n() {
+    assert_eq!(CircularIndex::<2>::N, 2);
 }
 
 #[test]
-fn new_returns_ok_given_a_value_strictly_less_than_the_modulus() {
+fn new_returns_ok_given_a_value_strictly_less_than_n() {
     {
         let res = CircularIndex::<8>::new(0);
 
@@ -82,7 +82,7 @@ fn new_returns_ok_given_a_value_strictly_less_than_the_modulus() {
 }
 
 #[test]
-fn new_returns_err_given_a_value_greater_than_or_equal_to_the_modulus() {
+fn new_returns_err_given_a_value_greater_than_or_equal_to_n() {
     {
         let res = CircularIndex::<5>::new(6);
 
