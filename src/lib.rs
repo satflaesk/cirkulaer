@@ -1,12 +1,6 @@
 #![allow(incomplete_features)]
 #![feature(generic_const_exprs)]
-
-//! Provides a circular index type suitable for indexing into primitive arrays
-//! in a circular, automatically wrapping manner:
-//!
-//! ```rust
-#![doc = include_str!("../examples/basic.rs")]
-//! ```
+#![doc = include_str!("../README.md")]
 
 use std::ops::{Add, AddAssign, Index, IndexMut, Sub, SubAssign};
 

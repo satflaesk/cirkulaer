@@ -14,7 +14,6 @@ pushd "${repo_root}/scripts";
 
 ./build-all-targets.sh;
 ./check-coverage.sh;
-./check-example-in-readme-file.sh;
 ./check-formatting.sh;
 ./generate-documentation.sh;
 ./run-all-examples.sh;
