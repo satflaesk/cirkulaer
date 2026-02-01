@@ -1,5 +1,5 @@
-Provides a circular index type suitable for indexing into primitive arrays in a
-circular, automatically wrapping manner:
+Provides a circular index type for circularly indexing into primitive, fixed-size
+[arrays](https://doc.rust-lang.org/std/primitive.array.html):
 
 ```rust
 use cirkulaer::CircularIndex;
