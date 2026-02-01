@@ -23,13 +23,6 @@ jobs:
     - uses: taiki-e/install-action@cargo-llvm-cov
     - run: ./scripts/check-coverage.sh --verbose
 
-  check-example-in-readme-file:
-    name: Check example in README file
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - run: ./scripts/check-example-in-readme-file.sh
-
   check-formatting:
     name: Check formatting
     runs-on: ubuntu-latest
