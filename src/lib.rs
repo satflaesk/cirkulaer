@@ -151,8 +151,8 @@ mod value_error_tests {
 mod inner {
     use super::{Bool, True, ValueError, is_strictly_positive};
 
-    /// A circular index type suitable for indexing into primitive arrays in a
-    /// circular, automatically wrapping manner.
+    /// A circular index type for circularly indexing into primitive, fixed-size
+    /// [arrays](https://doc.rust-lang.org/std/primitive.array.html).
     ///
     /// The const-generic argument `N` corresponds to `N` in `[T; N]`. Since the
     /// contained index must be non-negative and strictly lesser than `N`, `N`
