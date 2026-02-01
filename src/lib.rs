@@ -1,6 +1,7 @@
 #![allow(incomplete_features)]
-#![feature(generic_const_exprs)]
+#![deny(missing_docs)]
 #![doc = include_str!("../README.md")]
+#![feature(generic_const_exprs)]
 
 use std::ops::{Add, AddAssign, Index, IndexMut, Sub, SubAssign};
 
