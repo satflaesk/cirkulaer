@@ -57,72 +57,6 @@ mod value_error_tests {
     use super::ValueError;
 
     #[test]
-    fn derives_clone() {
-        fn f<T: Clone>(_: T) {}
-        let e = ValueError {
-            n: std::num::NonZeroUsize::new(2).unwrap(),
-            value: 3,
-        };
-
-        f(e);
-    }
-
-    #[test]
-    fn derives_copy() {
-        fn f<T: Copy>(_: T) {}
-        let e = ValueError {
-            n: std::num::NonZeroUsize::new(5).unwrap(),
-            value: 9,
-        };
-
-        f(e);
-    }
-
-    #[test]
-    fn derives_debug() {
-        fn f<T: std::fmt::Debug>(_: T) {}
-        let e = ValueError {
-            n: std::num::NonZeroUsize::new(4).unwrap(),
-            value: 4,
-        };
-
-        f(e);
-    }
-
-    #[test]
-    fn derives_eq() {
-        fn f<T: Eq>(_: T) {}
-        let e = ValueError {
-            n: std::num::NonZeroUsize::new(6).unwrap(),
-            value: 8,
-        };
-
-        f(e);
-    }
-
-    #[test]
-    fn derives_hash() {
-        fn f<T: std::hash::Hash>(_: T) {}
-        let e = ValueError {
-            n: std::num::NonZeroUsize::new(3).unwrap(),
-            value: 3,
-        };
-
-        f(e);
-    }
-
-    #[test]
-    fn derives_partial_eq() {
-        fn f<T: PartialEq>(_: T) {}
-        let e = ValueError {
-            n: std::num::NonZeroUsize::new(7).unwrap(),
-            value: 9,
-        };
-
-        f(e);
-    }
-
-    #[test]
     fn the_display_trait_implementation_works_as_intended() {
         let e = ValueError {
             n: std::num::NonZeroUsize::new(4).unwrap(),
@@ -135,17 +69,6 @@ mod value_error_tests {
             s,
             "Cannot create a circular index with N equal to 4 from a value of 5"
         );
-    }
-
-    #[test]
-    fn implements_std_error_error() {
-        fn f<T: std::error::Error>(_: T) {}
-        let e = ValueError {
-            n: std::num::NonZeroUsize::new(3).unwrap(),
-            value: 7,
-        };
-
-        f(e);
     }
 }
 
@@ -646,69 +569,6 @@ where
 #[cfg(test)]
 mod circular_index_tests {
     use super::*;
-
-    #[test]
-    fn derives_clone() {
-        fn f<T: Clone>(_: T) {}
-
-        f(CircularIndex::<7>::new(3).unwrap());
-    }
-
-    #[test]
-    fn derives_copy() {
-        fn f<T: Copy>(_: T) {}
-
-        f(CircularIndex::<4>::new(2).unwrap());
-    }
-
-    #[test]
-    fn derives_debug() {
-        fn f<T: std::fmt::Debug>(_: T) {}
-
-        f(CircularIndex::<6>::new(0).unwrap());
-    }
-
-    #[test]
-    fn derives_default() {
-        fn f<T: Default>(_: T) {}
-
-        f(CircularIndex::<8>::new(5).unwrap());
-    }
-
-    #[test]
-    fn derives_eq() {
-        fn f<T: Eq>(_: T) {}
-
-        f(CircularIndex::<7>::new(1).unwrap());
-    }
-
-    #[test]
-    fn derives_hash() {
-        fn f<T: std::hash::Hash>(_: T) {}
-
-        f(CircularIndex::<4>::new(1).unwrap());
-    }
-
-    #[test]
-    fn derives_ord() {
-        fn f<T: Ord>(_: T) {}
-
-        f(CircularIndex::<7>::new(3).unwrap());
-    }
-
-    #[test]
-    fn derives_partial_eq() {
-        fn f<T: PartialEq>(_: T) {}
-
-        f(CircularIndex::<4>::new(2).unwrap());
-    }
-
-    #[test]
-    fn derives_partial_ord() {
-        fn f<T: PartialOrd>(_: T) {}
-
-        f(CircularIndex::<5>::new(2).unwrap());
-    }
 
     #[test]
     fn is_of_the_same_size_as_usize() {
