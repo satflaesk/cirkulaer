@@ -1,0 +1,41 @@
+/// An error type to communicate that an attempt to construct a circular index
+/// failed as a result of the provided value not being strictly lesser than `N`
+/// in `CircularIndex<N>`.
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub struct ValueError {
+    pub(crate) n: std::num::NonZeroUsize,
+    pub(crate) value: usize,
+}
+
+impl std::fmt::Display for ValueError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(
+            f,
+            "Cannot create a circular index with N equal to {n} from a value of {value}",
+            n = self.n,
+            value = self.value,
+        )
+    }
+}
+
+impl std::error::Error for ValueError {}
+
+#[cfg(test)]
+mod tests {
+    use super::ValueError;
+
+    #[test]
+    fn the_display_trait_implementation_works_as_intended() {
+        let e = ValueError {
+            n: std::num::NonZeroUsize::new(4).unwrap(),
+            value: 6,
+        };
+
+        let s = e.to_string();
+
+        assert_eq!(
+            s,
+            "Cannot create a circular index with N equal to 4 from a value of 6"
+        );
+    }
+}
