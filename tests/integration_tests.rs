@@ -97,6 +97,13 @@ fn new_returns_err_given_a_value_greater_than_or_equal_to_n() {
 }
 
 #[test]
+fn new_unchecked_behaves_as_expected() {
+    let i = CircularIndex::<6>::new_unchecked(3);
+
+    assert_eq!(i.get(), 3);
+}
+
+#[test]
 fn get() {
     let i = CircularIndex::<4>::new(2).unwrap();
 

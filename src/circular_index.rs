@@ -2,7 +2,7 @@ use crate::{Bool, True, ValueError, is_strictly_positive};
 use std::ops::{Add, AddAssign, Index, IndexMut, Sub, SubAssign};
 
 mod inner {
-    use super::{Bool, True, ValueError, is_strictly_positive};
+    use super::{Bool, True, is_strictly_positive};
 
     /// A circular index type for circularly indexing into primitive, fixed-size
     /// [arrays](https://doc.rust-lang.org/std/primitive.array.html).
@@ -121,41 +121,13 @@ mod inner {
     where
         Bool<{ is_strictly_positive(N) }>: True,
     {
-        /// Attempt to create a new instance.
-        ///
-        /// # Examples
-        ///
-        /// ```rust
-        /// # fn main() {
-        /// # use cirkulaer::CircularIndex;
-        /// let ci = CircularIndex::<4>::new(1);
-        /// assert!(ci.is_ok());
-        /// assert_eq!(ci.unwrap().get(), 1);
-        ///
-        /// let ci = CircularIndex::<5>::new(5);
-        /// assert!(ci.is_err());
-        ///
-        /// let ci = CircularIndex::<8>::new(9);
-        /// assert!(ci.is_err());
-        /// # }
-        /// ```
-        ///
-        /// # Errors
-        ///
-        /// Returns [`ValueError`] if `value` is not strictly lesser than
-        /// [`Self::N`].
-        pub const fn new(value: usize) -> Result<Self, ValueError> {
-            if value >= Self::N {
-                // SAFETY: Thanks to the trait bound, `Self::N` is guaranteed to not be zero.
-                unsafe {
-                    return Err(ValueError {
-                        n: std::num::NonZeroUsize::new_unchecked(Self::N),
-                        value,
-                    });
-                }
-            }
-
-            Ok(Self { value, _seal: Seal })
+        /// Create a new instance without checking that `value` is strictly
+        /// lesser than [`Self::N`]. If `value` is greater than or equal to
+        /// [`Self::N`], the behavior is undefined.
+        #[must_use]
+        pub const fn new_unchecked(value: usize) -> Self {
+            debug_assert!(value < Self::N);
+            Self { value, _seal: Seal }
         }
 
         /// Return the contained index as a primitive type.
@@ -193,6 +165,43 @@ where
     /// # }
     /// ```
     pub const N: usize = N;
+
+    /// Attempt to create a new instance.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # fn main() {
+    /// # use cirkulaer::CircularIndex;
+    /// let ci = CircularIndex::<4>::new(1);
+    /// assert!(ci.is_ok());
+    /// assert_eq!(ci.unwrap().get(), 1);
+    ///
+    /// let ci = CircularIndex::<5>::new(5);
+    /// assert!(ci.is_err());
+    ///
+    /// let ci = CircularIndex::<8>::new(9);
+    /// assert!(ci.is_err());
+    /// # }
+    /// ```
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ValueError`] if `value` is not strictly lesser than
+    /// [`Self::N`].
+    pub const fn new(value: usize) -> Result<Self, ValueError> {
+        if value >= Self::N {
+            // SAFETY: Thanks to the trait bound, `Self::N` is guaranteed to not be zero.
+            unsafe {
+                return Err(ValueError {
+                    n: std::num::NonZeroUsize::new_unchecked(Self::N),
+                    value,
+                });
+            }
+        }
+
+        Ok(Self::new_unchecked(value))
+    }
 }
 
 impl<const N: usize> TryFrom<usize> for CircularIndex<N>
@@ -222,8 +231,7 @@ where
             rhs - min_rhs_that_entails_wrapping
         };
 
-        // TODO: Add `new_unchecked` and use it here.
-        Self::new(value).unwrap()
+        Self::new_unchecked(value)
     }
 }
 
@@ -500,6 +508,13 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[cfg(debug_assertions)]
+    #[should_panic]
+    #[test]
+    fn new_unchecked_panics_if_given_a_value_not_strictly_lesser_than_n() {
+        let _ = CircularIndex::<7>::new_unchecked(7);
+    }
 
     #[test]
     fn is_of_the_same_size_as_usize() {
