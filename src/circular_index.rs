@@ -481,8 +481,11 @@ where
     type Output = T;
 
     fn index(&self, index: CircularIndex<N>) -> &Self::Output {
-        // TODO: The indexing could be unchecked.
-        &self[index.get()]
+        debug_assert!(index.get() < N);
+
+        // SAFETY: `CircularIndex<N>` guarantees that its contained index is strictly
+        // lesser than `N`.
+        unsafe { self.get_unchecked(index.get()) }
     }
 }
 
@@ -491,8 +494,11 @@ where
     Bool<{ is_strictly_positive(N) }>: True,
 {
     fn index_mut(&mut self, index: CircularIndex<N>) -> &mut Self::Output {
-        // TODO: The indexing could be unchecked.
-        &mut self[index.get()]
+        debug_assert!(index.get() < N);
+
+        // SAFETY: `CircularIndex<N>` guarantees that its contained index is strictly
+        // lesser than `N`.
+        unsafe { self.get_unchecked_mut(index.get()) }
     }
 }
 
