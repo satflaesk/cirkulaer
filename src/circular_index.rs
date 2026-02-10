@@ -105,7 +105,7 @@ mod inner {
     /// let size = std::mem::size_of::<CircularIndex::<0>>(); // Fails to compile.
     /// # }
     /// ```
-    #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
     pub struct CircularIndex<const N: usize>
     where
         Bool<{ is_strictly_positive(N) }>: True,
@@ -201,6 +201,22 @@ where
         }
 
         Ok(Self::new_unchecked(value))
+    }
+
+    /// Create an instance with the index set to zero.
+    #[must_use]
+    pub const fn zero() -> Self {
+        Self::new_unchecked(0)
+    }
+}
+
+impl<const N: usize> Default for CircularIndex<N>
+where
+    Bool<{ is_strictly_positive(N) }>: True,
+{
+    /// Create an instance with the index set to zero.
+    fn default() -> Self {
+        Self::zero()
     }
 }
 

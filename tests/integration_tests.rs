@@ -31,13 +31,6 @@ fn copies_compare_equal_to_their_source() {
 }
 
 #[test]
-fn defaults_to_zero() {
-    let i = CircularIndex::<6>::default();
-
-    assert_eq!(i.get(), 0);
-}
-
-#[test]
 fn is_equatable() {
     let i = CircularIndex::<9>::new(2).unwrap();
     let j = CircularIndex::<9>::new(2).unwrap();
@@ -108,6 +101,20 @@ fn get() {
     let i = CircularIndex::<4>::new(2).unwrap();
 
     assert_eq!(i.get(), 2);
+}
+
+#[test]
+fn is_zero_upon_calling_zero_constructor() {
+    let i = CircularIndex::<3>::zero();
+
+    assert_eq!(i.get(), 0);
+}
+
+#[test]
+fn defaults_to_zero() {
+    let i = CircularIndex::<6>::default();
+
+    assert_eq!(i.get(), 0);
 }
 
 #[test]
