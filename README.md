@@ -8,19 +8,16 @@ fn main() {
     const N: usize = 5;
     let mut array = [0; N];
 
-    let mut ci = CircularIndex::<N>::new(0).unwrap();
-
-    array[ci] = 2;
+    let mut i = CircularIndex::<N>::zero();
+    array[i] = 2;
     assert_eq!(array, [2, 0, 0, 0, 0]);
 
-    ci -= 1;
-
-    array[ci] = 4;
+    i -= 1;
+    array[i] = 4;
     assert_eq!(array, [2, 0, 0, 0, 4]);
 
-    ci += 3;
-
-    array[ci] = 8;
+    i += 3;
+    array[i] = 8;
     assert_eq!(array, [2, 0, 8, 0, 4]);
 }
 ```

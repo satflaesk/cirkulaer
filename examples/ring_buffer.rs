@@ -22,8 +22,8 @@ where
 
         Self {
             buffer,
-            index_of_next: CircularIndex::<CAPACITY>::default(),
-            index_of_oldest: CircularIndex::<CAPACITY>::default(),
+            index_of_next: CircularIndex::<CAPACITY>::zero(),
+            index_of_oldest: CircularIndex::<CAPACITY>::zero(),
         }
     }
 
