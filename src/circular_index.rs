@@ -51,20 +51,20 @@ mod inner {
     /// const CAPACITY: usize = 3;
     /// let mut array = [0; CAPACITY];
     ///
-    /// let mut ci = CircularIndex::<CAPACITY>::new(0).unwrap();
-    /// array[ci] += 1;
+    /// let mut i = CircularIndex::<CAPACITY>::zero();
+    /// array[i] += 1;
     ///
-    /// ci += 1;
-    /// array[ci] += 2;
+    /// i += 1;
+    /// array[i] += 2;
     ///
-    /// ci += 1;
-    /// array[ci] += 3;
+    /// i += 1;
+    /// array[i] += 3;
     ///
-    /// ci += 1;
-    /// array[ci] += 4;
+    /// i += 1;
+    /// array[i] += 4;
     ///
-    /// ci += 100 * CAPACITY;
-    /// array[ci] += 10;
+    /// i += 100 * CAPACITY;
+    /// array[i] += 10;
     ///
     /// assert_eq!(array, [15, 2, 3]);
     /// # }
@@ -75,13 +75,13 @@ mod inner {
     /// ```rust
     /// # fn main() {
     /// # use cirkulaer::CircularIndex;
-    /// let mut ci = CircularIndex::<{ usize::MAX }>::new(7).unwrap();
+    /// let mut i = CircularIndex::<{ usize::MAX }>::new(7).unwrap();
     ///
-    /// ci += usize::MAX;
-    /// assert_eq!(ci.get(), 7);
+    /// i += usize::MAX;
+    /// assert_eq!(i.get(), 7);
     ///
-    /// ci -= usize::MAX;
-    /// assert_eq!(ci.get(), 7);
+    /// i -= usize::MAX;
+    /// assert_eq!(i.get(), 7);
     /// # }
     /// ```
     ///
@@ -91,9 +91,9 @@ mod inner {
     /// # fn main() {
     /// # use cirkulaer::CircularIndex;
     /// let array = [1, 2, 3, 4];
-    /// let ci = CircularIndex::<5>::new(0);
+    /// let i = CircularIndex::<5>::zero();
     ///
-    /// let element = array[ci]; // Fails to compile.
+    /// let element = array[i]; // Fails to compile.
     /// # }
     /// ```
     ///
@@ -137,8 +137,8 @@ mod inner {
         /// ```rust
         /// # fn main() {
         /// # use cirkulaer::CircularIndex;
-        /// let ci = CircularIndex::<4>::new(2).unwrap();
-        /// assert_eq!(ci.get(), 2);
+        /// let i = CircularIndex::<4>::new(2).unwrap();
+        /// assert_eq!(i.get(), 2);
         /// # }
         /// ```
         #[must_use]
@@ -173,15 +173,15 @@ where
     /// ```rust
     /// # fn main() {
     /// # use cirkulaer::CircularIndex;
-    /// let ci = CircularIndex::<4>::new(1);
-    /// assert!(ci.is_ok());
-    /// assert_eq!(ci.unwrap().get(), 1);
+    /// let i = CircularIndex::<4>::new(1);
+    /// assert!(i.is_ok());
+    /// assert_eq!(i.unwrap().get(), 1);
     ///
-    /// let ci = CircularIndex::<5>::new(5);
-    /// assert!(ci.is_err());
+    /// let i = CircularIndex::<5>::new(5);
+    /// assert!(i.is_err());
     ///
-    /// let ci = CircularIndex::<8>::new(9);
-    /// assert!(ci.is_err());
+    /// let i = CircularIndex::<8>::new(9);
+    /// assert!(i.is_err());
     /// # }
     /// ```
     ///
