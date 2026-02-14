@@ -13,6 +13,7 @@ repo_root=$(git rev-parse --show-toplevel);
 pushd "${repo_root}/scripts";
 
 ./build-all-targets.sh;
+
 ./check-coverage.sh;
 ./check-formatting.sh;
 ./generate-documentation.sh;
@@ -21,5 +22,7 @@ pushd "${repo_root}/scripts";
 ./run-all-tests-under-miri.sh;
 ./run-all-tests.sh;
 ./run-clippy.sh;
+
+./run-all-benchmarks.sh;
 
 popd;
