@@ -31,14 +31,23 @@ jobs:
     - run: rustup component add rustfmt
     - run: ./scripts/check-formatting.sh --verbose
 
-  generate-documentation:
-    name: Generate documentation
+  generate-all-documentation:
+    name: Generate all documentation
     runs-on: ubuntu-latest
     env:
       RUSTDOCFLAGS: -Dwarnings
     steps:
     - uses: actions/checkout@v4
-    - run: ./scripts/generate-documentation.sh --verbose
+    - run: ./scripts/generate-all-documentation.sh --verbose
+
+  generate-public-documentation:
+    name: Generate public documentation
+    runs-on: ubuntu-latest
+    env:
+      RUSTDOCFLAGS: -Dwarnings
+    steps:
+    - uses: actions/checkout@v4
+    - run: ./scripts/generate-public-documentation.sh --verbose
 
   run-all-examples-under-miri:
     name: Run all examples under Miri

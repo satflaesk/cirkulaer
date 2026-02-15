@@ -1,6 +1,8 @@
 use crate::{Bool, True, ValueError, is_strictly_positive};
 use std::ops::{Add, AddAssign, Index, IndexMut, Sub, SubAssign};
 
+/// A module whose purpose is to reduce the risk of the invariants of [`CircularIndex`] being
+/// violated.
 mod inner {
     use super::{Bool, True, is_strictly_positive};
 
@@ -107,10 +109,18 @@ mod inner {
     where
         Bool<{ is_strictly_positive(N) }>: True,
     {
+        /// The contained index.
         value: usize,
+
+        /// A private field whose purpose is to prevent [`CircularIndex`] from being constructed
+        /// using `CircularIndex { ... }` struct literal syntax outside of the
+        /// [`inner`](super::inner) module; its presence also forces code outside of
+        /// [`inner`](super::inner) to access the [`value`](CircularIndex::value) field via the
+        /// [`get`](CircularIndex::get) function.
         _seal: Seal,
     }
 
+    /// A zero-sized type private to the [`inner`](super::inner) module.
     #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
     struct Seal;
 
@@ -144,6 +154,7 @@ mod inner {
     }
 }
 
+// Re-export `CircularIndex` for public use while intentionally omitting the `Seal` struct.
 pub use inner::CircularIndex;
 
 impl<const N: usize> CircularIndex<N>

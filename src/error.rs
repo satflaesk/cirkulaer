@@ -2,7 +2,13 @@
 /// the provided value not being strictly lesser than `N` in `CircularIndex<N>`.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct ValueError {
+    /// The value of the `N` const-generic of the particular
+    /// [`CircularIndex`](crate::circular_index::CircularIndex) type that was attempted to be
+    /// constructed.
     pub(crate) n: std::num::NonZeroUsize,
+
+    /// The erroneous value provided to the
+    /// [`CircularIndex::new`](crate::circular_index::CircularIndex::new) constructor.
     pub(crate) value: usize,
 }
 

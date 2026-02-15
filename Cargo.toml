@@ -9,6 +9,7 @@ rand = "0.10.0"
 [lints.clippy]
 all = "deny"
 cargo = "deny"
+missing_docs_in_private_items = "deny"
 nursery = "deny"
 pedantic = "deny"
 
