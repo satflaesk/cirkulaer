@@ -1,5 +1,4 @@
-/// A struct to help enforce that `N` in `CircularIndex<N>` is strictly
-/// positive.
+/// A struct to help enforce that `N` in `CircularIndex<N>` is strictly positive.
 pub struct Bool<const BOOL: bool>;
 
 /// A trait to help enforce that `N` in `CircularIndex<N>` is strictly positive.

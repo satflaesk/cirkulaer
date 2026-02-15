@@ -7,15 +7,13 @@ mod inner {
     /// A circular index type for circularly indexing into primitive, fixed-size
     /// [arrays](https://doc.rust-lang.org/std/primitive.array.html).
     ///
-    /// The const-generic argument `N` corresponds to `N` in `[T; N]`. Since the
-    /// contained index must be non-negative and strictly lesser than `N`, `N`
-    /// must be strictly positive.
+    /// The const-generic argument `N` corresponds to `N` in `[T; N]`. Since the contained index
+    /// must be non-negative and strictly lesser than `N`, `N` must be strictly positive.
     ///
-    /// To help enforce that `N` is strictly positive at compile time, the
-    /// unstable `generic_const_exprs` feature is used; this enables enforcing
-    /// strict positivity with a `Bool<{ is_strictly_positive(N) }>: True` trait
-    /// bound. Consequently, user code that parameterizes `CircularIndex` over
-    /// `N` must repeat this exact trait bound:
+    /// To help enforce that `N` is strictly positive at compile time, the unstable
+    /// `generic_const_exprs` feature is used; this enables enforcing strict positivity with a
+    /// `Bool<{ is_strictly_positive(N) }>: True` trait bound. Consequently, user code that
+    /// parameterizes `CircularIndex` over `N` must repeat this exact trait bound:
     ///
     /// ```rust
     /// #![allow(incomplete_features)]
@@ -42,8 +40,7 @@ mod inner {
     ///
     /// # Examples
     ///
-    /// Instances automatically wrap around and are guaranteed to stay within
-    /// range:
+    /// Instances automatically wrap around and are guaranteed to stay within range:
     ///
     /// ```rust
     /// # fn main() {
@@ -121,9 +118,8 @@ mod inner {
     where
         Bool<{ is_strictly_positive(N) }>: True,
     {
-        /// Create a new instance without checking that `value` is strictly
-        /// lesser than [`Self::N`]. If `value` is greater than or equal to
-        /// [`Self::N`], the behavior is undefined.
+        /// Create a new instance without checking that `value` is strictly lesser than [`Self::N`].
+        /// If `value` is greater than or equal to [`Self::N`], the behavior is undefined.
         #[must_use]
         pub const fn new_unchecked(value: usize) -> Self {
             debug_assert!(value < Self::N);
@@ -187,8 +183,7 @@ where
     ///
     /// # Errors
     ///
-    /// Returns [`ValueError`] if `value` is not strictly lesser than
-    /// [`Self::N`].
+    /// Returns [`ValueError`] if `value` is not strictly lesser than [`Self::N`].
     pub const fn new(value: usize) -> Result<Self, ValueError> {
         if value >= Self::N {
             // SAFETY: Thanks to the trait bound, `Self::N` is guaranteed not to be zero.
@@ -247,17 +242,15 @@ where
         let min_rhs_that_entails_wrapping = unsafe { Self::N.unchecked_sub(self.get()) };
 
         let value = if rhs < min_rhs_that_entails_wrapping {
-            // SAFETY: Since `min_rhs_that_entails_wrapping` is equal to the difference
-            // between `Self::N` and `self.get()`, and since `rhs` is strictly lesser than
-            // `min_rhs_that_entails_wrapping`, it follows that the sum of `self.get()` and
-            // `rhs` is strictly lesser than `Self::N`. Consequently, this sum is guaranteed
-            // not to overflow.
+            // SAFETY: Since `min_rhs_that_entails_wrapping` is equal to the difference between
+            // `Self::N` and `self.get()`, and since `rhs` is strictly lesser than
+            // `min_rhs_that_entails_wrapping`, it follows that the sum of `self.get()` and `rhs` is
+            // strictly lesser than `Self::N`. Consequently, this sum is guaranteed not to overflow.
             debug_assert!((self.get() + rhs) < Self::N);
             unsafe { self.get().unchecked_add(rhs) }
         } else {
-            // SAFETY: Since `rhs` is greater than or equal to
-            // `min_rhs_that_entails_wrapping`, their difference is guaranteed not to
-            // underflow.
+            // SAFETY: Since `rhs` is greater than or equal to `min_rhs_that_entails_wrapping`,
+            // their difference is guaranteed not to underflow.
             debug_assert!(rhs >= min_rhs_that_entails_wrapping);
             unsafe { rhs.unchecked_sub(min_rhs_that_entails_wrapping) }
         };
@@ -352,8 +345,8 @@ where
     fn sub(self, rhs: usize) -> Self::Output {
         let rhs = rhs % Self::N;
 
-        // SAFETY: The above modulus operation guarantees that `Self::N` is strictly
-        // greater than `rhs`, hence their difference is guaranteed not to underflow.
+        // SAFETY: The above modulus operation guarantees that `Self::N` is strictly greater than
+        // `rhs`, hence their difference is guaranteed not to underflow.
         debug_assert!(Self::N > rhs);
         self + unsafe { Self::N.unchecked_sub(rhs) }
     }
@@ -515,8 +508,8 @@ where
     type Output = T;
 
     fn index(&self, index: CircularIndex<N>) -> &Self::Output {
-        // SAFETY: `CircularIndex<N>` guarantees that its contained index is strictly
-        // lesser than `N`.
+        // SAFETY: `CircularIndex<N>` guarantees that its contained index is strictly lesser than
+        // `N`.
         debug_assert!(index.get() < N);
         unsafe { self.get_unchecked(index.get()) }
     }
@@ -527,8 +520,8 @@ where
     Bool<{ is_strictly_positive(N) }>: True,
 {
     fn index_mut(&mut self, index: CircularIndex<N>) -> &mut Self::Output {
-        // SAFETY: `CircularIndex<N>` guarantees that its contained index is strictly
-        // lesser than `N`.
+        // SAFETY: `CircularIndex<N>` guarantees that its contained index is strictly lesser than
+        // `N`.
         debug_assert!(index.get() < N);
         unsafe { self.get_unchecked_mut(index.get()) }
     }
