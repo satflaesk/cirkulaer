@@ -1,6 +1,5 @@
-/// An error type to communicate that an attempt to construct a circular index
-/// failed as a result of the provided value not being strictly lesser than `N`
-/// in `CircularIndex<N>`.
+/// An error type to communicate that an attempt to construct a circular index failed as a result of
+/// the provided value not being strictly lesser than `N` in `CircularIndex<N>`.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct ValueError {
     pub(crate) n: std::num::NonZeroUsize,
