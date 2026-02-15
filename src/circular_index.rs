@@ -191,7 +191,8 @@ where
     /// [`Self::N`].
     pub const fn new(value: usize) -> Result<Self, ValueError> {
         if value >= Self::N {
-            // SAFETY: Thanks to the trait bound, `Self::N` is guaranteed to not be zero.
+            // SAFETY: Thanks to the trait bound, `Self::N` is guaranteed not to be zero.
+            debug_assert!(Self::N != 0);
             unsafe {
                 return Err(ValueError {
                     n: std::num::NonZeroUsize::new_unchecked(Self::N),
@@ -239,12 +240,26 @@ where
 
     fn add(self, rhs: usize) -> Self::Output {
         let rhs = rhs % Self::N;
-        let min_rhs_that_entails_wrapping = Self::N - self.get();
+
+        // SAFETY: By construction, `Self::N` is guaranteed to be strictly greater than
+        // `self.get()`, hence their difference is guaranteed not to underflow.
+        debug_assert!(Self::N > self.get());
+        let min_rhs_that_entails_wrapping = unsafe { Self::N.unchecked_sub(self.get()) };
 
         let value = if rhs < min_rhs_that_entails_wrapping {
-            self.get() + rhs
+            // SAFETY: Since `min_rhs_that_entails_wrapping` is equal to the difference
+            // between `Self::N` and `self.get()`, and since `rhs` is strictly lesser than
+            // `min_rhs_that_entails_wrapping`, it follows that the sum of `self.get()` and
+            // `rhs` is strictly lesser than `Self::N`. Consequently, this sum is guaranteed
+            // not to overflow.
+            debug_assert!((self.get() + rhs) < Self::N);
+            unsafe { self.get().unchecked_add(rhs) }
         } else {
-            rhs - min_rhs_that_entails_wrapping
+            // SAFETY: Since `rhs` is greater than or equal to
+            // `min_rhs_that_entails_wrapping`, their difference is guaranteed not to
+            // underflow.
+            debug_assert!(rhs >= min_rhs_that_entails_wrapping);
+            unsafe { rhs.unchecked_sub(min_rhs_that_entails_wrapping) }
         };
 
         Self::new_unchecked(value)
@@ -337,7 +352,10 @@ where
     fn sub(self, rhs: usize) -> Self::Output {
         let rhs = rhs % Self::N;
 
-        self + (Self::N - rhs)
+        // SAFETY: The above modulus operation guarantees that `Self::N` is strictly
+        // greater than `rhs`, hence their difference is guaranteed not to underflow.
+        debug_assert!(Self::N > rhs);
+        self + unsafe { Self::N.unchecked_sub(rhs) }
     }
 }
 
@@ -497,10 +515,9 @@ where
     type Output = T;
 
     fn index(&self, index: CircularIndex<N>) -> &Self::Output {
-        debug_assert!(index.get() < N);
-
         // SAFETY: `CircularIndex<N>` guarantees that its contained index is strictly
         // lesser than `N`.
+        debug_assert!(index.get() < N);
         unsafe { self.get_unchecked(index.get()) }
     }
 }
@@ -510,10 +527,9 @@ where
     Bool<{ is_strictly_positive(N) }>: True,
 {
     fn index_mut(&mut self, index: CircularIndex<N>) -> &mut Self::Output {
-        debug_assert!(index.get() < N);
-
         // SAFETY: `CircularIndex<N>` guarantees that its contained index is strictly
         // lesser than `N`.
+        debug_assert!(index.get() < N);
         unsafe { self.get_unchecked_mut(index.get()) }
     }
 }
