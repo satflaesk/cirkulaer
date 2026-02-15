@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-# To automatically run this script before pushing, navigate to the root directory of the repository
-# and issue the following sequence of commands:
+# To automatically run this script before a commit can be created, navigate to the root directory of
+# the repository and issue the following sequence of commands:
 #
 # $ mkdir --parents .git/hooks
 # $ cd .git/hooks
-# $ ln --symbolic ../../scripts/pre-push.sh pre-push
+# $ ln --interactive --symbolic ../../.githooks/pre-commit.sh pre-commit
 
 set -eoux pipefail;
 
