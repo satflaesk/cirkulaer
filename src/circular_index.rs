@@ -215,6 +215,39 @@ where
     pub const fn zero() -> Self {
         Self::new_unchecked(0)
     }
+
+    /// Create an instance with the index set to its lowest possible value; i.e., to zero. Identical
+    /// to calling [`zero`](CircularIndex::zero).
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # fn main() {
+    /// # use cirkulaer::CircularIndex;
+    /// let i = CircularIndex::<4>::lowest();
+    /// assert_eq!(i.get(), 0);
+    /// # }
+    /// ```
+    #[must_use]
+    pub const fn lowest() -> Self {
+        Self::zero()
+    }
+
+    /// Create an instance with the index set to its highest possible value; i.e., to `N` minus one.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # fn main() {
+    /// # use cirkulaer::CircularIndex;
+    /// let i = CircularIndex::<8>::highest();
+    /// assert_eq!(i.get(), 7);
+    /// # }
+    /// ```
+    #[must_use]
+    pub const fn highest() -> Self {
+        Self::new_unchecked(Self::N - 1)
+    }
 }
 
 impl<const N: usize> Default for CircularIndex<N>

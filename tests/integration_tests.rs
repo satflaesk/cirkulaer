@@ -111,6 +111,22 @@ fn is_zero_upon_calling_zero_constructor() {
 }
 
 #[test]
+fn lowest_constructor_behaves_identical_to_zero_constructor() {
+    let i = CircularIndex::<5>::zero();
+
+    let j = CircularIndex::<5>::lowest();
+
+    assert_eq!(i, j);
+}
+
+#[test]
+fn equals_n_minus_one_upon_calling_highest_constructor() {
+    let i = CircularIndex::<9>::highest();
+
+    assert_eq!(i.get(), 8);
+}
+
+#[test]
 fn defaults_to_zero() {
     let i = CircularIndex::<6>::default();
 
