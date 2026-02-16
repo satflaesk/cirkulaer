@@ -248,6 +248,48 @@ where
     pub const fn highest() -> Self {
         Self::new_unchecked(Self::N - 1)
     }
+
+    /// If `N` is even, create an instance with the index at its "lower" middlemost value, else
+    /// create an instance with the index at its single middlemost value. In case of the latter, the
+    /// behavior is identical to that of [`mid_ceiled`](CircularIndex::mid_ceiled).
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # fn main() {
+    /// # use cirkulaer::CircularIndex;
+    /// let i = CircularIndex::<6>::mid_floored();
+    /// assert_eq!(i.get(), 2);
+    ///
+    /// let i = CircularIndex::<7>::mid_floored();
+    /// assert_eq!(i.get(), 3);
+    /// # }
+    /// ```
+    #[must_use]
+    pub const fn mid_floored() -> Self {
+        Self::new_unchecked((Self::N - 1) / 2)
+    }
+
+    /// If `N` is even, create an instance with the index at its "higher" middlemost value, else
+    /// create an instance with the index at its single middlemost value. In case of the latter, the
+    /// behavior is identical to that of [`mid_floored`](CircularIndex::mid_floored).
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # fn main() {
+    /// # use cirkulaer::CircularIndex;
+    /// let i = CircularIndex::<6>::mid_ceiled();
+    /// assert_eq!(i.get(), 3);
+    ///
+    /// let i = CircularIndex::<7>::mid_ceiled();
+    /// assert_eq!(i.get(), 3);
+    /// # }
+    /// ```
+    #[must_use]
+    pub const fn mid_ceiled() -> Self {
+        Self::new_unchecked(Self::N / 2)
+    }
 }
 
 impl<const N: usize> Default for CircularIndex<N>

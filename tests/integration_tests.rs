@@ -127,6 +127,34 @@ fn equals_n_minus_one_upon_calling_highest_constructor() {
 }
 
 #[test]
+fn mid_floored_gives_the_lower_middlemost_index_for_even_n() {
+    let i = CircularIndex::<6>::mid_floored();
+
+    assert_eq!(i.get(), 2);
+}
+
+#[test]
+fn mid_floored_gives_the_single_middlemost_index_for_odd_n() {
+    let i = CircularIndex::<3>::mid_floored();
+
+    assert_eq!(i.get(), 1);
+}
+
+#[test]
+fn mid_ceiled_gives_the_higher_middlemost_index_for_even_n() {
+    let i = CircularIndex::<4>::mid_ceiled();
+
+    assert_eq!(i.get(), 2);
+}
+
+#[test]
+fn mid_ceiled_gives_the_single_middlemost_index_for_odd_n() {
+    let i = CircularIndex::<7>::mid_ceiled();
+
+    assert_eq!(i.get(), 3);
+}
+
+#[test]
 fn defaults_to_zero() {
     let i = CircularIndex::<6>::default();
 
