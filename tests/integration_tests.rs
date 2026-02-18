@@ -31,6 +31,13 @@ fn copies_compare_equal_to_their_source() {
 }
 
 #[test]
+fn defaults_to_zero() {
+    let i = CircularIndex::<6>::default();
+
+    assert_eq!(i.get(), 0);
+}
+
+#[test]
 fn is_equatable() {
     let i = CircularIndex::<9>::with_value(2).unwrap();
     let j = CircularIndex::<9>::with_value(2).unwrap();
@@ -57,6 +64,21 @@ fn is_orderable() {
 #[test]
 fn the_associated_constant_equals_n() {
     assert_eq!(CircularIndex::<2>::N, 2);
+}
+
+#[test]
+fn is_zero_upon_calling_new_constructor() {
+    let i = CircularIndex::<7>::new();
+
+    assert_eq!(i.get(), 0);
+}
+
+#[test]
+fn new_and_default_behave_the_same() {
+    let i = CircularIndex::<2>::new();
+    let j = CircularIndex::<2>::default();
+
+    assert_eq!(i, j);
 }
 
 #[test]
@@ -152,13 +174,6 @@ fn mid_ceiled_gives_the_single_middlemost_index_for_odd_n() {
     let i = CircularIndex::<7>::mid_ceiled();
 
     assert_eq!(i.get(), 3);
-}
-
-#[test]
-fn defaults_to_zero() {
-    let i = CircularIndex::<6>::default();
-
-    assert_eq!(i.get(), 0);
 }
 
 #[test]
