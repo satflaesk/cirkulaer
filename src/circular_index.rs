@@ -652,4 +652,18 @@ mod tests {
 
         assert_eq!(i.to_string(), "3 (N=5)");
     }
+
+    #[test]
+    fn is_send() {
+        fn assert_is_send<T: Send>() {}
+
+        assert_is_send::<CircularIndex<4>>();
+    }
+
+    #[test]
+    fn is_sync() {
+        fn assert_is_sync<T: Sync>() {}
+
+        assert_is_sync::<CircularIndex<6>>();
+    }
 }

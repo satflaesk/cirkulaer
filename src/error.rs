@@ -44,4 +44,18 @@ mod tests {
             "cannot create a circular index with N equal to 4 from a value of 6"
         );
     }
+
+    #[test]
+    fn is_send() {
+        fn assert_is_send<T: Send>() {}
+
+        assert_is_send::<ValueError>();
+    }
+
+    #[test]
+    fn is_sync() {
+        fn assert_is_sync<T: Sync>() {}
+
+        assert_is_sync::<ValueError>();
+    }
 }
