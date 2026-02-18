@@ -8,8 +8,8 @@
 mod circular_index;
 pub use crate::circular_index::CircularIndex;
 
-/// A module that implements the [`ValueError`] type returned by [`CircularIndex::new`] in case of
-/// error.
+/// A module that implements the [`ValueError`] type returned by [`CircularIndex::with_value`] in
+/// case of error.
 mod error;
 pub use crate::error::ValueError;
 
