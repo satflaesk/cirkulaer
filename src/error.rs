@@ -17,7 +17,7 @@ impl std::fmt::Display for ValueError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(
             f,
-            "Cannot create a circular index with N equal to {n} from a value of {value}",
+            "cannot create a circular index with N equal to {n} from a value of {value}",
             n = self.n,
             value = self.value,
         )
@@ -41,7 +41,7 @@ mod tests {
 
         assert_eq!(
             s,
-            "Cannot create a circular index with N equal to 4 from a value of 6"
+            "cannot create a circular index with N equal to 4 from a value of 6"
         );
     }
 }
