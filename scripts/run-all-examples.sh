@@ -2,4 +2,4 @@
 
 set -eoux pipefail;
 
-cargo run --example ring_buffer "${@}";
+cargo run --example circular_buffer "${@}";
