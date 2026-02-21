@@ -2,4 +2,4 @@
 
 set -eoux pipefail;
 
-cargo miri test "${@}";
+cargo +nightly miri test "${@}";

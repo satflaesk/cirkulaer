@@ -1,44 +1,14 @@
-use crate::{Bool, True, ValueError, is_strictly_positive};
+use crate::ValueError;
 use std::ops::{Add, AddAssign, Index, IndexMut, Sub, SubAssign};
 
 /// A module whose purpose is to reduce the risk of the invariants of [`CircularIndex`] being
 /// violated.
 mod inner {
-    use super::{Bool, True, is_strictly_positive};
-
     /// A circular index type for circularly indexing into primitive, fixed-size
     /// [arrays](https://doc.rust-lang.org/std/primitive.array.html).
     ///
     /// The const-generic argument `N` corresponds to `N` in `[T; N]`. Since the contained index
-    /// must be non-negative and strictly lesser than `N`, `N` must be strictly positive.
-    ///
-    /// To help enforce that `N` is strictly positive at compile time, the unstable
-    /// `generic_const_exprs` feature is used; this enables enforcing strict positivity with a
-    /// `Bool<{ is_strictly_positive(N) }>: True` trait bound. Consequently, user code that
-    /// parameterizes `CircularIndex` over `N` must repeat this exact trait bound:
-    ///
-    /// ```rust
-    /// #![allow(incomplete_features)]
-    /// #![feature(generic_const_exprs)]
-    ///
-    /// use cirkulaer::{Bool, CircularIndex, True, is_strictly_positive};
-    ///
-    /// pub struct RingBuffer<T, const CAPACITY: usize>
-    /// where
-    ///     Bool<{ is_strictly_positive(CAPACITY) }>: True,
-    /// {
-    ///     buffer: [Option<T>; CAPACITY],
-    ///     index_of_next: CircularIndex<CAPACITY>,
-    ///     index_of_oldest: CircularIndex<CAPACITY>,
-    /// }
-    ///
-    /// impl<T, const CAPACITY: usize> RingBuffer<T, CAPACITY>
-    /// where
-    ///     Bool<{ is_strictly_positive(CAPACITY) }>: True,
-    /// {
-    ///     // ...
-    /// }
-    /// ```
+    /// must be strictly lesser than `N`, `N` cannot be zero.
     ///
     /// # Examples
     ///
@@ -96,19 +66,16 @@ mod inner {
     /// # }
     /// ```
     ///
-    /// If `N` is zero, compilation fails:
+    /// If trying to construct an instance with `N` equal to zero, compilation fails:
     ///
     /// ```rust,compile_fail
     /// # fn main() {
     /// # use cirkulaer::CircularIndex;
-    /// let size = std::mem::size_of::<CircularIndex::<0>>(); // Fails to compile.
+    /// let _ = CircularIndex::<0>::default(); // Fails to compile.
     /// # }
     /// ```
-    #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-    pub struct CircularIndex<const N: usize>
-    where
-        Bool<{ is_strictly_positive(N) }>: True,
-    {
+    #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    pub struct CircularIndex<const N: usize> {
         /// The contained index.
         value: usize,
 
@@ -124,16 +91,18 @@ mod inner {
     #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
     struct Seal;
 
-    impl<const N: usize> CircularIndex<N>
-    where
-        Bool<{ is_strictly_positive(N) }>: True,
-    {
+    impl<const N: usize> CircularIndex<N> {
         /// Create a new instance with the contained index set to `value`, without checking that
         /// `value` is strictly lesser than [`Self::N`]. If `value` is greater than or equal to
         /// [`Self::N`], the behavior is undefined.
         #[must_use]
         pub const fn with_value_unchecked(value: usize) -> Self {
+            const {
+                assert!(N != 0, "`N` must not be zero");
+            }
+
             debug_assert!(value < Self::N);
+
             Self { value, _seal: Seal }
         }
 
@@ -158,10 +127,7 @@ mod inner {
 // Re-export `CircularIndex` for public use while intentionally omitting the `Seal` struct.
 pub use inner::CircularIndex;
 
-impl<const N: usize> CircularIndex<N>
-where
-    Bool<{ is_strictly_positive(N) }>: True,
-{
+impl<const N: usize> CircularIndex<N> {
     /// The const-generic argument `N` in `CircularIndex<N>`.
     ///
     /// # Examples
@@ -299,10 +265,15 @@ where
     }
 }
 
-impl<const N: usize> TryFrom<usize> for CircularIndex<N>
-where
-    Bool<{ is_strictly_positive(N) }>: True,
-{
+// The `Default` trait is manually implemented to ensure that `N` cannot equal zero.
+impl<const N: usize> Default for CircularIndex<N> {
+    /// Create an instance with the index set to zero.
+    fn default() -> Self {
+        Self::zero()
+    }
+}
+
+impl<const N: usize> TryFrom<usize> for CircularIndex<N> {
     type Error = ValueError;
 
     fn try_from(value: usize) -> Result<Self, Self::Error> {
@@ -310,10 +281,7 @@ where
     }
 }
 
-impl<const N: usize> Add<usize> for CircularIndex<N>
-where
-    Bool<{ is_strictly_positive(N) }>: True,
-{
+impl<const N: usize> Add<usize> for CircularIndex<N> {
     type Output = Self;
 
     fn add(self, rhs: usize) -> Self::Output {
@@ -342,10 +310,7 @@ where
     }
 }
 
-impl<const N: usize> Add<&usize> for CircularIndex<N>
-where
-    Bool<{ is_strictly_positive(N) }>: True,
-{
+impl<const N: usize> Add<&usize> for CircularIndex<N> {
     type Output = <Self as Add<usize>>::Output;
 
     fn add(self, rhs: &usize) -> Self::Output {
@@ -353,10 +318,7 @@ where
     }
 }
 
-impl<const N: usize> Add<usize> for &CircularIndex<N>
-where
-    Bool<{ is_strictly_positive(N) }>: True,
-{
+impl<const N: usize> Add<usize> for &CircularIndex<N> {
     type Output = <CircularIndex<N> as Add<usize>>::Output;
 
     fn add(self, rhs: usize) -> Self::Output {
@@ -364,10 +326,7 @@ where
     }
 }
 
-impl<const N: usize> Add<&usize> for &CircularIndex<N>
-where
-    Bool<{ is_strictly_positive(N) }>: True,
-{
+impl<const N: usize> Add<&usize> for &CircularIndex<N> {
     type Output = <CircularIndex<N> as Add<usize>>::Output;
 
     fn add(self, rhs: &usize) -> Self::Output {
@@ -375,10 +334,7 @@ where
     }
 }
 
-impl<const N: usize> Add for CircularIndex<N>
-where
-    Bool<{ is_strictly_positive(N) }>: True,
-{
+impl<const N: usize> Add for CircularIndex<N> {
     type Output = <Self as Add<usize>>::Output;
 
     fn add(self, rhs: Self) -> Self::Output {
@@ -386,10 +342,7 @@ where
     }
 }
 
-impl<const N: usize> Add<&Self> for CircularIndex<N>
-where
-    Bool<{ is_strictly_positive(N) }>: True,
-{
+impl<const N: usize> Add<&Self> for CircularIndex<N> {
     type Output = <Self as Add<usize>>::Output;
 
     fn add(self, rhs: &Self) -> Self::Output {
@@ -397,10 +350,7 @@ where
     }
 }
 
-impl<const N: usize> Add<CircularIndex<N>> for &CircularIndex<N>
-where
-    Bool<{ is_strictly_positive(N) }>: True,
-{
+impl<const N: usize> Add<CircularIndex<N>> for &CircularIndex<N> {
     type Output = <CircularIndex<N> as Add<usize>>::Output;
 
     fn add(self, rhs: CircularIndex<N>) -> Self::Output {
@@ -408,10 +358,7 @@ where
     }
 }
 
-impl<const N: usize> Add for &CircularIndex<N>
-where
-    Bool<{ is_strictly_positive(N) }>: True,
-{
+impl<const N: usize> Add for &CircularIndex<N> {
     type Output = <CircularIndex<N> as Add<usize>>::Output;
 
     fn add(self, rhs: Self) -> Self::Output {
@@ -419,10 +366,7 @@ where
     }
 }
 
-impl<const N: usize> Sub<usize> for CircularIndex<N>
-where
-    Bool<{ is_strictly_positive(N) }>: True,
-{
+impl<const N: usize> Sub<usize> for CircularIndex<N> {
     type Output = Self;
 
     fn sub(self, rhs: usize) -> Self::Output {
@@ -435,10 +379,7 @@ where
     }
 }
 
-impl<const N: usize> Sub<&usize> for CircularIndex<N>
-where
-    Bool<{ is_strictly_positive(N) }>: True,
-{
+impl<const N: usize> Sub<&usize> for CircularIndex<N> {
     type Output = <Self as Sub<usize>>::Output;
 
     fn sub(self, rhs: &usize) -> Self::Output {
@@ -446,10 +387,7 @@ where
     }
 }
 
-impl<const N: usize> Sub<usize> for &CircularIndex<N>
-where
-    Bool<{ is_strictly_positive(N) }>: True,
-{
+impl<const N: usize> Sub<usize> for &CircularIndex<N> {
     type Output = <CircularIndex<N> as Sub<usize>>::Output;
 
     fn sub(self, rhs: usize) -> Self::Output {
@@ -457,10 +395,7 @@ where
     }
 }
 
-impl<const N: usize> Sub<&usize> for &CircularIndex<N>
-where
-    Bool<{ is_strictly_positive(N) }>: True,
-{
+impl<const N: usize> Sub<&usize> for &CircularIndex<N> {
     type Output = <CircularIndex<N> as Sub<usize>>::Output;
 
     fn sub(self, rhs: &usize) -> Self::Output {
@@ -468,10 +403,7 @@ where
     }
 }
 
-impl<const N: usize> Sub for CircularIndex<N>
-where
-    Bool<{ is_strictly_positive(N) }>: True,
-{
+impl<const N: usize> Sub for CircularIndex<N> {
     type Output = <Self as Sub<usize>>::Output;
 
     fn sub(self, rhs: Self) -> Self::Output {
@@ -479,10 +411,7 @@ where
     }
 }
 
-impl<const N: usize> Sub<&Self> for CircularIndex<N>
-where
-    Bool<{ is_strictly_positive(N) }>: True,
-{
+impl<const N: usize> Sub<&Self> for CircularIndex<N> {
     type Output = <Self as Sub<usize>>::Output;
 
     fn sub(self, rhs: &Self) -> Self::Output {
@@ -490,10 +419,7 @@ where
     }
 }
 
-impl<const N: usize> Sub<CircularIndex<N>> for &CircularIndex<N>
-where
-    Bool<{ is_strictly_positive(N) }>: True,
-{
+impl<const N: usize> Sub<CircularIndex<N>> for &CircularIndex<N> {
     type Output = <CircularIndex<N> as Sub<usize>>::Output;
 
     fn sub(self, rhs: CircularIndex<N>) -> Self::Output {
@@ -501,10 +427,7 @@ where
     }
 }
 
-impl<const N: usize> Sub for &CircularIndex<N>
-where
-    Bool<{ is_strictly_positive(N) }>: True,
-{
+impl<const N: usize> Sub for &CircularIndex<N> {
     type Output = <CircularIndex<N> as Sub<usize>>::Output;
 
     fn sub(self, rhs: Self) -> Self::Output {
@@ -512,82 +435,55 @@ where
     }
 }
 
-impl<const N: usize> AddAssign<usize> for CircularIndex<N>
-where
-    Bool<{ is_strictly_positive(N) }>: True,
-{
+impl<const N: usize> AddAssign<usize> for CircularIndex<N> {
     fn add_assign(&mut self, rhs: usize) {
         *self = *self + rhs;
     }
 }
 
-impl<const N: usize> AddAssign<&usize> for CircularIndex<N>
-where
-    Bool<{ is_strictly_positive(N) }>: True,
-{
+impl<const N: usize> AddAssign<&usize> for CircularIndex<N> {
     fn add_assign(&mut self, rhs: &usize) {
         *self = *self + *rhs;
     }
 }
 
-impl<const N: usize> AddAssign for CircularIndex<N>
-where
-    Bool<{ is_strictly_positive(N) }>: True,
-{
+impl<const N: usize> AddAssign for CircularIndex<N> {
     fn add_assign(&mut self, rhs: Self) {
         *self = *self + rhs;
     }
 }
 
-impl<const N: usize> AddAssign<&Self> for CircularIndex<N>
-where
-    Bool<{ is_strictly_positive(N) }>: True,
-{
+impl<const N: usize> AddAssign<&Self> for CircularIndex<N> {
     fn add_assign(&mut self, rhs: &Self) {
         *self = *self + *rhs;
     }
 }
 
-impl<const N: usize> SubAssign<usize> for CircularIndex<N>
-where
-    Bool<{ is_strictly_positive(N) }>: True,
-{
+impl<const N: usize> SubAssign<usize> for CircularIndex<N> {
     fn sub_assign(&mut self, rhs: usize) {
         *self = *self - rhs;
     }
 }
 
-impl<const N: usize> SubAssign<&usize> for CircularIndex<N>
-where
-    Bool<{ is_strictly_positive(N) }>: True,
-{
+impl<const N: usize> SubAssign<&usize> for CircularIndex<N> {
     fn sub_assign(&mut self, rhs: &usize) {
         *self = *self - *rhs;
     }
 }
 
-impl<const N: usize> SubAssign for CircularIndex<N>
-where
-    Bool<{ is_strictly_positive(N) }>: True,
-{
+impl<const N: usize> SubAssign for CircularIndex<N> {
     fn sub_assign(&mut self, rhs: Self) {
         *self = *self - rhs;
     }
 }
 
-impl<const N: usize> SubAssign<&Self> for CircularIndex<N>
-where
-    Bool<{ is_strictly_positive(N) }>: True,
-{
+impl<const N: usize> SubAssign<&Self> for CircularIndex<N> {
     fn sub_assign(&mut self, rhs: &Self) {
         *self = *self - *rhs;
     }
 }
 
-impl<T, const N: usize> Index<CircularIndex<N>> for [T; N]
-where
-    Bool<{ is_strictly_positive(N) }>: True,
-{
+impl<T, const N: usize> Index<CircularIndex<N>> for [T; N] {
     type Output = T;
 
     fn index(&self, index: CircularIndex<N>) -> &Self::Output {
@@ -598,10 +494,7 @@ where
     }
 }
 
-impl<T, const N: usize> IndexMut<CircularIndex<N>> for [T; N]
-where
-    Bool<{ is_strictly_positive(N) }>: True,
-{
+impl<T, const N: usize> IndexMut<CircularIndex<N>> for [T; N] {
     fn index_mut(&mut self, index: CircularIndex<N>) -> &mut Self::Output {
         // SAFETY: `CircularIndex<N>` guarantees that its contained index is strictly lesser than
         // `N`.
@@ -610,10 +503,7 @@ where
     }
 }
 
-impl<const N: usize> std::fmt::Display for CircularIndex<N>
-where
-    Bool<{ is_strictly_positive(N) }>: True,
-{
+impl<const N: usize> std::fmt::Display for CircularIndex<N> {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "{value} (N={n})", value = self.get(), n = Self::N)
     }

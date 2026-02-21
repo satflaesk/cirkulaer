@@ -1,21 +1,12 @@
-#![allow(incomplete_features)]
-#![feature(generic_const_exprs)]
+use cirkulaer::CircularIndex;
 
-use cirkulaer::{Bool, CircularIndex, True, is_strictly_positive};
-
-pub struct RingBuffer<T, const CAPACITY: usize>
-where
-    Bool<{ is_strictly_positive(CAPACITY) }>: True,
-{
+pub struct RingBuffer<T, const CAPACITY: usize> {
     buffer: [Option<T>; CAPACITY],
     index_of_next: CircularIndex<CAPACITY>,
     index_of_oldest: CircularIndex<CAPACITY>,
 }
 
-impl<T, const CAPACITY: usize> RingBuffer<T, CAPACITY>
-where
-    Bool<{ is_strictly_positive(CAPACITY) }>: True,
-{
+impl<T, const CAPACITY: usize> RingBuffer<T, CAPACITY> {
     #[must_use]
     pub fn new() -> Self {
         let buffer: [Option<T>; CAPACITY] = std::array::from_fn(|_| None);
