@@ -2,4 +2,4 @@
 
 set -eoux pipefail;
 
-cargo +nightly miri run --example ring_buffer "${@}";
+cargo +nightly miri run --example circular_buffer "${@}";
