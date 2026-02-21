@@ -1,16 +1,4 @@
-use cirkulaer::{CircularIndex, ValueError, is_strictly_positive};
-
-#[test]
-fn zero_is_not_strictly_positive() {
-    assert!(!is_strictly_positive(0));
-}
-
-#[test]
-fn nonzero_numbers_are_strictly_positive() {
-    assert!(is_strictly_positive(1));
-    assert!(is_strictly_positive(1024));
-    assert!(is_strictly_positive(usize::MAX));
-}
+use cirkulaer::{CircularIndex, ValueError};
 
 #[test]
 fn clones_compare_equal_to_their_source() {
@@ -28,13 +16,6 @@ fn copies_compare_equal_to_their_source() {
     let j = i;
 
     assert_eq!(i, j);
-}
-
-#[test]
-fn defaults_to_zero() {
-    let i = CircularIndex::<6>::default();
-
-    assert_eq!(i.get(), 0);
 }
 
 #[test]
@@ -174,6 +155,13 @@ fn mid_ceiled_gives_the_single_middlemost_index_for_odd_n() {
     let i = CircularIndex::<7>::mid_ceiled();
 
     assert_eq!(i.get(), 3);
+}
+
+#[test]
+fn defaults_to_zero() {
+    let i = CircularIndex::<6>::default();
+
+    assert_eq!(i.get(), 0);
 }
 
 #[test]
