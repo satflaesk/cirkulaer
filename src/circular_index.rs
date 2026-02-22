@@ -164,14 +164,7 @@ impl<const N: usize> CircularIndex<N> {
     /// Returns [`ValueError`] if `value` is not strictly lesser than [`Self::N`].
     pub const fn new(value: usize) -> Result<Self, ValueError> {
         if value >= Self::N {
-            // SAFETY: Thanks to the trait bound, `Self::N` is guaranteed not to be zero.
-            debug_assert!(Self::N != 0);
-            unsafe {
-                return Err(ValueError {
-                    n: std::num::NonZeroUsize::new_unchecked(Self::N),
-                    value,
-                });
-            }
+            return Err(ValueError { n: Self::N, value });
         }
 
         Ok(Self::new_unchecked(value))
