@@ -5,7 +5,7 @@ pub struct ValueError {
     /// The value of the `N` const-generic of the particular
     /// [`CircularIndex`](crate::circular_index::CircularIndex) type that was attempted to be
     /// constructed.
-    pub(crate) n: std::num::NonZeroUsize,
+    pub(crate) n: usize,
 
     /// The erroneous value provided to the
     /// [`CircularIndex::new`](crate::circular_index::CircularIndex::new) constructor.
@@ -31,10 +31,7 @@ mod tests {
 
     #[test]
     fn the_display_trait_implementation_works_as_intended() {
-        let e = ValueError {
-            n: std::num::NonZeroUsize::new(4).unwrap(),
-            value: 6,
-        };
+        let e = ValueError { n: 4, value: 6 };
 
         let s = e.to_string();
 
