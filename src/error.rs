@@ -8,8 +8,7 @@ pub struct ValueError {
     pub(crate) n: std::num::NonZeroUsize,
 
     /// The erroneous value provided to the
-    /// [`CircularIndex::with_value`](crate::circular_index::CircularIndex::with_value)
-    /// constructor.
+    /// [`CircularIndex::new`](crate::circular_index::CircularIndex::new) constructor.
     pub(crate) value: usize,
 }
 

@@ -44,7 +44,7 @@ mod inner {
     /// ```rust
     /// # fn main() {
     /// # use cirkulaer::CircularIndex;
-    /// let mut i = CircularIndex::<{ usize::MAX }>::with_value(7).unwrap();
+    /// let mut i = CircularIndex::<{ usize::MAX }>::new(7).unwrap();
     ///
     /// i += usize::MAX;
     /// assert_eq!(i.get(), 7);
@@ -96,7 +96,7 @@ mod inner {
         /// `value` is strictly lesser than [`Self::N`]. If `value` is greater than or equal to
         /// [`Self::N`], the behavior is undefined.
         #[must_use]
-        pub const fn with_value_unchecked(value: usize) -> Self {
+        pub const fn new_unchecked(value: usize) -> Self {
             const {
                 assert!(N != 0, "`N` must not be zero");
             }
@@ -113,7 +113,7 @@ mod inner {
         /// ```rust
         /// # fn main() {
         /// # use cirkulaer::CircularIndex;
-        /// let i = CircularIndex::<4>::with_value(2).unwrap();
+        /// let i = CircularIndex::<4>::new(2).unwrap();
         /// assert_eq!(i.get(), 2);
         /// # }
         /// ```
@@ -140,12 +140,6 @@ impl<const N: usize> CircularIndex<N> {
     /// ```
     pub const N: usize = N;
 
-    /// Create an instance with the index set to zero.
-    #[must_use]
-    pub const fn new() -> Self {
-        Self::zero()
-    }
-
     /// Attempt to create a new instance with the contained index set to `value`.
     ///
     /// # Examples
@@ -153,14 +147,14 @@ impl<const N: usize> CircularIndex<N> {
     /// ```rust
     /// # fn main() {
     /// # use cirkulaer::CircularIndex;
-    /// let i = CircularIndex::<4>::with_value(1);
+    /// let i = CircularIndex::<4>::new(1);
     /// assert!(i.is_ok());
     /// assert_eq!(i.unwrap().get(), 1);
     ///
-    /// let i = CircularIndex::<5>::with_value(5);
+    /// let i = CircularIndex::<5>::new(5);
     /// assert!(i.is_err());
     ///
-    /// let i = CircularIndex::<8>::with_value(9);
+    /// let i = CircularIndex::<8>::new(9);
     /// assert!(i.is_err());
     /// # }
     /// ```
@@ -168,7 +162,7 @@ impl<const N: usize> CircularIndex<N> {
     /// # Errors
     ///
     /// Returns [`ValueError`] if `value` is not strictly lesser than [`Self::N`].
-    pub const fn with_value(value: usize) -> Result<Self, ValueError> {
+    pub const fn new(value: usize) -> Result<Self, ValueError> {
         if value >= Self::N {
             // SAFETY: Thanks to the trait bound, `Self::N` is guaranteed not to be zero.
             debug_assert!(Self::N != 0);
@@ -180,13 +174,13 @@ impl<const N: usize> CircularIndex<N> {
             }
         }
 
-        Ok(Self::with_value_unchecked(value))
+        Ok(Self::new_unchecked(value))
     }
 
     /// Create an instance with the index set to zero.
     #[must_use]
     pub const fn zero() -> Self {
-        Self::with_value_unchecked(0)
+        Self::new_unchecked(0)
     }
 
     /// Create an instance with the index set to its lowest possible value; i.e., to zero. Identical
@@ -219,7 +213,7 @@ impl<const N: usize> CircularIndex<N> {
     /// ```
     #[must_use]
     pub const fn highest() -> Self {
-        Self::with_value_unchecked(Self::N - 1)
+        Self::new_unchecked(Self::N - 1)
     }
 
     /// If `N` is even, create an instance with the index at its "lower" middlemost value, else
@@ -240,7 +234,7 @@ impl<const N: usize> CircularIndex<N> {
     /// ```
     #[must_use]
     pub const fn mid_floored() -> Self {
-        Self::with_value_unchecked((Self::N - 1) / 2)
+        Self::new_unchecked((Self::N - 1) / 2)
     }
 
     /// If `N` is even, create an instance with the index at its "higher" middlemost value, else
@@ -261,7 +255,7 @@ impl<const N: usize> CircularIndex<N> {
     /// ```
     #[must_use]
     pub const fn mid_ceiled() -> Self {
-        Self::with_value_unchecked(Self::N / 2)
+        Self::new_unchecked(Self::N / 2)
     }
 }
 
@@ -277,7 +271,7 @@ impl<const N: usize> TryFrom<usize> for CircularIndex<N> {
     type Error = ValueError;
 
     fn try_from(value: usize) -> Result<Self, Self::Error> {
-        Self::with_value(value)
+        Self::new(value)
     }
 }
 
@@ -306,7 +300,7 @@ impl<const N: usize> Add<usize> for CircularIndex<N> {
             unsafe { rhs.unchecked_sub(min_rhs_that_entails_wrapping) }
         };
 
-        Self::with_value_unchecked(value)
+        Self::new_unchecked(value)
     }
 }
 
@@ -516,8 +510,8 @@ mod tests {
     #[cfg(debug_assertions)]
     #[should_panic]
     #[test]
-    fn with_value_unchecked_panics_if_given_a_value_not_strictly_lesser_than_n() {
-        let _ = CircularIndex::<7>::with_value_unchecked(7);
+    fn new_unchecked_panics_if_given_a_value_not_strictly_lesser_than_n() {
+        let _ = CircularIndex::<7>::new_unchecked(7);
     }
 
     #[test]
@@ -538,7 +532,7 @@ mod tests {
 
     #[test]
     fn the_display_trait_implementation_works_as_intended() {
-        let i = CircularIndex::<5>::with_value(3).unwrap();
+        let i = CircularIndex::<5>::new(3).unwrap();
 
         assert_eq!(i.to_string(), "3 (N=5)");
     }
