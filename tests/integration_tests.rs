@@ -2,7 +2,7 @@ use cirkulaer::{CircularIndex, ValueError};
 
 #[test]
 fn clones_compare_equal_to_their_source() {
-    let i = CircularIndex::<7>::with_value(6).unwrap();
+    let i = CircularIndex::<7>::new(6).unwrap();
 
     let j = i.clone();
 
@@ -11,7 +11,7 @@ fn clones_compare_equal_to_their_source() {
 
 #[test]
 fn copies_compare_equal_to_their_source() {
-    let i = CircularIndex::<8>::with_value(4).unwrap();
+    let i = CircularIndex::<8>::new(4).unwrap();
 
     let j = i;
 
@@ -20,9 +20,9 @@ fn copies_compare_equal_to_their_source() {
 
 #[test]
 fn is_equatable() {
-    let i = CircularIndex::<9>::with_value(2).unwrap();
-    let j = CircularIndex::<9>::with_value(2).unwrap();
-    let k = CircularIndex::<9>::with_value(3).unwrap();
+    let i = CircularIndex::<9>::new(2).unwrap();
+    let j = CircularIndex::<9>::new(2).unwrap();
+    let k = CircularIndex::<9>::new(3).unwrap();
 
     assert_eq!(i, i);
     assert_eq!(i, j);
@@ -31,8 +31,8 @@ fn is_equatable() {
 
 #[test]
 fn is_orderable() {
-    let i = CircularIndex::<5>::with_value(1).unwrap();
-    let j = CircularIndex::<5>::with_value(4).unwrap();
+    let i = CircularIndex::<5>::new(1).unwrap();
+    let j = CircularIndex::<5>::new(4).unwrap();
 
     assert!(i <= i);
     assert!(i <= j);
@@ -48,60 +48,45 @@ fn the_associated_constant_equals_n() {
 }
 
 #[test]
-fn is_zero_upon_calling_new_constructor() {
-    let i = CircularIndex::<7>::new();
-
-    assert_eq!(i.get(), 0);
-}
-
-#[test]
-fn new_and_default_behave_the_same() {
-    let i = CircularIndex::<2>::new();
-    let j = CircularIndex::<2>::default();
-
-    assert_eq!(i, j);
-}
-
-#[test]
-fn with_value_returns_ok_given_a_value_strictly_less_than_n() {
+fn new_returns_ok_given_a_value_strictly_less_than_n() {
     {
-        let res = CircularIndex::<8>::with_value(0);
+        let res = CircularIndex::<8>::new(0);
 
         assert!(res.is_ok());
     }
 
     {
-        let res = CircularIndex::<4>::with_value(3);
+        let res = CircularIndex::<4>::new(3);
 
         assert!(res.is_ok());
     }
 }
 
 #[test]
-fn with_value_returns_err_given_a_value_greater_than_or_equal_to_n() {
+fn new_returns_err_given_a_value_greater_than_or_equal_to_n() {
     {
-        let res = CircularIndex::<5>::with_value(6);
+        let res = CircularIndex::<5>::new(6);
 
         assert!(res.is_err());
     }
 
     {
-        let res = CircularIndex::<7>::with_value(7);
+        let res = CircularIndex::<7>::new(7);
 
         assert!(res.is_err());
     }
 }
 
 #[test]
-fn with_value_unchecked_behaves_as_expected() {
-    let i = CircularIndex::<6>::with_value_unchecked(3);
+fn new_unchecked_behaves_as_expected() {
+    let i = CircularIndex::<6>::new_unchecked(3);
 
     assert_eq!(i.get(), 3);
 }
 
 #[test]
 fn get() {
-    let i = CircularIndex::<4>::with_value(2).unwrap();
+    let i = CircularIndex::<4>::new(2).unwrap();
 
     assert_eq!(i.get(), 2);
 }
@@ -165,7 +150,7 @@ fn defaults_to_zero() {
 }
 
 #[test]
-fn try_from_behaves_like_with_value() {
+fn try_from_behaves_like_new() {
     {
         let i = CircularIndex::<3>::try_from(1);
 
@@ -181,7 +166,7 @@ fn try_from_behaves_like_with_value() {
 }
 
 #[test]
-fn try_into_behaves_like_with_value() {
+fn try_into_behaves_like_new() {
     {
         let i: Result<CircularIndex<7>, ValueError> = 4.try_into();
 
@@ -199,7 +184,7 @@ fn try_into_behaves_like_with_value() {
 #[test]
 fn supports_addition_with_any_usize() {
     {
-        let i = CircularIndex::<7>::with_value(2).unwrap();
+        let i = CircularIndex::<7>::new(2).unwrap();
 
         let j = i + 3;
 
@@ -207,7 +192,7 @@ fn supports_addition_with_any_usize() {
     }
 
     {
-        let i = CircularIndex::<8>::with_value(6).unwrap();
+        let i = CircularIndex::<8>::new(6).unwrap();
 
         let j = i + 4;
 
@@ -215,7 +200,7 @@ fn supports_addition_with_any_usize() {
     }
 
     {
-        let i = CircularIndex::<7>::with_value(1).unwrap();
+        let i = CircularIndex::<7>::new(1).unwrap();
 
         let j = i + 21;
 
@@ -223,7 +208,7 @@ fn supports_addition_with_any_usize() {
     }
 
     {
-        let i = CircularIndex::<{ usize::MAX }>::with_value(9).unwrap();
+        let i = CircularIndex::<{ usize::MAX }>::new(9).unwrap();
 
         let j = i + usize::MAX;
 
@@ -231,7 +216,7 @@ fn supports_addition_with_any_usize() {
     }
 
     {
-        let i = CircularIndex::<4>::with_value(1).unwrap();
+        let i = CircularIndex::<4>::new(1).unwrap();
 
         let j = i + &2;
 
@@ -239,7 +224,7 @@ fn supports_addition_with_any_usize() {
     }
 
     {
-        let i = CircularIndex::<2>::with_value(0).unwrap();
+        let i = CircularIndex::<2>::new(0).unwrap();
 
         let j = &i + 1;
 
@@ -247,7 +232,7 @@ fn supports_addition_with_any_usize() {
     }
 
     {
-        let i = CircularIndex::<4>::with_value(0).unwrap();
+        let i = CircularIndex::<4>::new(0).unwrap();
 
         let j = &i + &3;
 
@@ -258,8 +243,8 @@ fn supports_addition_with_any_usize() {
 #[test]
 fn supports_addition_with_circular_index() {
     {
-        let i = CircularIndex::<5>::with_value(1).unwrap();
-        let j = CircularIndex::<5>::with_value(2).unwrap();
+        let i = CircularIndex::<5>::new(1).unwrap();
+        let j = CircularIndex::<5>::new(2).unwrap();
 
         let k = i + j;
 
@@ -267,8 +252,8 @@ fn supports_addition_with_circular_index() {
     }
 
     {
-        let i = CircularIndex::<3>::with_value(1).unwrap();
-        let j = CircularIndex::<3>::with_value(1).unwrap();
+        let i = CircularIndex::<3>::new(1).unwrap();
+        let j = CircularIndex::<3>::new(1).unwrap();
 
         let k = i + &j;
 
@@ -276,8 +261,8 @@ fn supports_addition_with_circular_index() {
     }
 
     {
-        let i = CircularIndex::<5>::with_value(2).unwrap();
-        let j = CircularIndex::<5>::with_value(1).unwrap();
+        let i = CircularIndex::<5>::new(2).unwrap();
+        let j = CircularIndex::<5>::new(1).unwrap();
 
         let k = &i + j;
 
@@ -285,8 +270,8 @@ fn supports_addition_with_circular_index() {
     }
 
     {
-        let i = CircularIndex::<7>::with_value(3).unwrap();
-        let j = CircularIndex::<7>::with_value(2).unwrap();
+        let i = CircularIndex::<7>::new(3).unwrap();
+        let j = CircularIndex::<7>::new(2).unwrap();
 
         let k = &i + &j;
 
@@ -297,7 +282,7 @@ fn supports_addition_with_circular_index() {
 #[test]
 fn supports_subtraction_with_any_usize() {
     {
-        let i = CircularIndex::<3>::with_value(1).unwrap();
+        let i = CircularIndex::<3>::new(1).unwrap();
 
         let j = i - 1;
 
@@ -305,7 +290,7 @@ fn supports_subtraction_with_any_usize() {
     }
 
     {
-        let i = CircularIndex::<6>::with_value(4).unwrap();
+        let i = CircularIndex::<6>::new(4).unwrap();
 
         let j = i - 5;
 
@@ -313,7 +298,7 @@ fn supports_subtraction_with_any_usize() {
     }
 
     {
-        let i = CircularIndex::<5>::with_value(3).unwrap();
+        let i = CircularIndex::<5>::new(3).unwrap();
 
         let j = i - 10;
 
@@ -321,7 +306,7 @@ fn supports_subtraction_with_any_usize() {
     }
 
     {
-        let i = CircularIndex::<{ usize::MAX }>::with_value(7).unwrap();
+        let i = CircularIndex::<{ usize::MAX }>::new(7).unwrap();
 
         let j = i - usize::MAX;
 
@@ -329,7 +314,7 @@ fn supports_subtraction_with_any_usize() {
     }
 
     {
-        let i = CircularIndex::<7>::with_value(4).unwrap();
+        let i = CircularIndex::<7>::new(4).unwrap();
 
         let j = i - &2;
 
@@ -337,7 +322,7 @@ fn supports_subtraction_with_any_usize() {
     }
 
     {
-        let i = CircularIndex::<8>::with_value(6).unwrap();
+        let i = CircularIndex::<8>::new(6).unwrap();
 
         let j = &i - 1;
 
@@ -345,7 +330,7 @@ fn supports_subtraction_with_any_usize() {
     }
 
     {
-        let i = CircularIndex::<7>::with_value(6).unwrap();
+        let i = CircularIndex::<7>::new(6).unwrap();
 
         let j = &i - &4;
 
@@ -356,8 +341,8 @@ fn supports_subtraction_with_any_usize() {
 #[test]
 fn supports_subtraction_with_circular_index() {
     {
-        let i = CircularIndex::<4>::with_value(3).unwrap();
-        let j = CircularIndex::<4>::with_value(1).unwrap();
+        let i = CircularIndex::<4>::new(3).unwrap();
+        let j = CircularIndex::<4>::new(1).unwrap();
 
         let k = i - j;
 
@@ -365,8 +350,8 @@ fn supports_subtraction_with_circular_index() {
     }
 
     {
-        let i = CircularIndex::<8>::with_value(6).unwrap();
-        let j = CircularIndex::<8>::with_value(5).unwrap();
+        let i = CircularIndex::<8>::new(6).unwrap();
+        let j = CircularIndex::<8>::new(5).unwrap();
 
         let k = i - &j;
 
@@ -374,8 +359,8 @@ fn supports_subtraction_with_circular_index() {
     }
 
     {
-        let i = CircularIndex::<3>::with_value(2).unwrap();
-        let j = CircularIndex::<3>::with_value(1).unwrap();
+        let i = CircularIndex::<3>::new(2).unwrap();
+        let j = CircularIndex::<3>::new(1).unwrap();
 
         let k = &i - j;
 
@@ -383,8 +368,8 @@ fn supports_subtraction_with_circular_index() {
     }
 
     {
-        let i = CircularIndex::<7>::with_value(5).unwrap();
-        let j = CircularIndex::<7>::with_value(5).unwrap();
+        let i = CircularIndex::<7>::new(5).unwrap();
+        let j = CircularIndex::<7>::new(5).unwrap();
 
         let k = &i - &j;
 
@@ -395,7 +380,7 @@ fn supports_subtraction_with_circular_index() {
 #[test]
 fn supports_addition_assignment_from_usize() {
     {
-        let mut i = CircularIndex::<3>::with_value(1).unwrap();
+        let mut i = CircularIndex::<3>::new(1).unwrap();
 
         i += 1;
 
@@ -403,7 +388,7 @@ fn supports_addition_assignment_from_usize() {
     }
 
     {
-        let mut i = CircularIndex::<7>::with_value(3).unwrap();
+        let mut i = CircularIndex::<7>::new(3).unwrap();
 
         i += &3;
 
@@ -414,8 +399,8 @@ fn supports_addition_assignment_from_usize() {
 #[test]
 fn supports_addition_assignment_from_circular_index() {
     {
-        let mut i = CircularIndex::<4>::with_value(2).unwrap();
-        let j = CircularIndex::<4>::with_value(1).unwrap();
+        let mut i = CircularIndex::<4>::new(2).unwrap();
+        let j = CircularIndex::<4>::new(1).unwrap();
 
         i += j;
 
@@ -423,8 +408,8 @@ fn supports_addition_assignment_from_circular_index() {
     }
 
     {
-        let mut i = CircularIndex::<9>::with_value(5).unwrap();
-        let j = CircularIndex::<9>::with_value(2).unwrap();
+        let mut i = CircularIndex::<9>::new(5).unwrap();
+        let j = CircularIndex::<9>::new(2).unwrap();
 
         i += &j;
 
@@ -435,7 +420,7 @@ fn supports_addition_assignment_from_circular_index() {
 #[test]
 fn supports_subtraction_assignment_from_usize() {
     {
-        let mut i = CircularIndex::<9>::with_value(6).unwrap();
+        let mut i = CircularIndex::<9>::new(6).unwrap();
 
         i -= 3;
 
@@ -443,7 +428,7 @@ fn supports_subtraction_assignment_from_usize() {
     }
 
     {
-        let mut i = CircularIndex::<9>::with_value(7).unwrap();
+        let mut i = CircularIndex::<9>::new(7).unwrap();
 
         i -= &7;
 
@@ -454,8 +439,8 @@ fn supports_subtraction_assignment_from_usize() {
 #[test]
 fn supports_subtraction_assignment_from_circular_index() {
     {
-        let mut i = CircularIndex::<7>::with_value(4).unwrap();
-        let j = CircularIndex::<7>::with_value(2).unwrap();
+        let mut i = CircularIndex::<7>::new(4).unwrap();
+        let j = CircularIndex::<7>::new(2).unwrap();
 
         i -= j;
 
@@ -463,8 +448,8 @@ fn supports_subtraction_assignment_from_circular_index() {
     }
 
     {
-        let mut i = CircularIndex::<4>::with_value(3).unwrap();
-        let j = CircularIndex::<4>::with_value(2).unwrap();
+        let mut i = CircularIndex::<4>::new(3).unwrap();
+        let j = CircularIndex::<4>::new(2).unwrap();
 
         i -= &j;
 
@@ -475,7 +460,7 @@ fn supports_subtraction_assignment_from_circular_index() {
 #[test]
 fn supports_indexing_into_primitive_arrays() {
     let array = [5, 8, 4, 3];
-    let i = CircularIndex::<4>::with_value(2).unwrap();
+    let i = CircularIndex::<4>::new(2).unwrap();
 
     assert_eq!(array[i], 4);
 }
@@ -483,7 +468,7 @@ fn supports_indexing_into_primitive_arrays() {
 #[test]
 fn supports_mutable_indexing_into_primitive_arrays() {
     let mut array = [6, 9, 7, 2, 3, 8];
-    let i = CircularIndex::<6>::with_value(5).unwrap();
+    let i = CircularIndex::<6>::new(5).unwrap();
 
     array[i] = 1;
 
