@@ -44,15 +44,18 @@ mod inner {
     /// Addition and subtraction operations are guaranteed not to overflow:
     ///
     /// ```rust
-    /// # fn main() {
-    /// # use cirkulaer::CircularIndex;
-    /// let mut i = CircularIndex::<{ usize::MAX }>::new(7).unwrap();
+    /// # use cirkulaer::{CircularIndex, ValueError};
+    /// #
+    /// # fn main() -> Result<(), ValueError> {
+    /// let mut i = CircularIndex::<{ usize::MAX }>::new(7)?;
     ///
     /// i += usize::MAX;
     /// assert_eq!(i.get(), 7);
     ///
     /// i -= usize::MAX;
     /// assert_eq!(i.get(), 7);
+    /// #
+    /// #     Ok(())
     /// # }
     /// ```
     ///
@@ -113,10 +116,13 @@ mod inner {
         /// # Examples
         ///
         /// ```rust
-        /// # fn main() {
-        /// # use cirkulaer::CircularIndex;
-        /// let i = CircularIndex::<4>::new(2).unwrap();
+        /// # use cirkulaer::{CircularIndex, ValueError};
+        /// #
+        /// # fn main() -> Result<(), ValueError> {
+        /// let i = CircularIndex::<4>::new(2)?;
         /// assert_eq!(i.get(), 2);
+        /// #
+        /// #     Ok(())
         /// # }
         /// ```
         #[must_use]
@@ -147,17 +153,19 @@ impl<const N: usize> CircularIndex<N> {
     /// # Examples
     ///
     /// ```rust
-    /// # fn main() {
-    /// # use cirkulaer::CircularIndex;
+    /// # use cirkulaer::{CircularIndex, ValueError};
+    /// #
+    /// # fn main() -> Result<(), ValueError> {
     /// let i = CircularIndex::<4>::new(1);
-    /// assert!(i.is_ok());
-    /// assert_eq!(i.unwrap().get(), 1);
+    /// assert_eq!(i?.get(), 1);
     ///
     /// let i = CircularIndex::<5>::new(5);
     /// assert!(i.is_err());
     ///
     /// let i = CircularIndex::<8>::new(9);
     /// assert!(i.is_err());
+    /// #
+    /// #     Ok(())
     /// # }
     /// ```
     ///
