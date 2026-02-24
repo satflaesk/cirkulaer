@@ -17,8 +17,9 @@ mod inner {
     /// Instances automatically wrap around and are guaranteed to stay within range:
     ///
     /// ```rust
-    /// # fn main() {
     /// # use cirkulaer::CircularIndex;
+    /// #
+    /// # fn main() {
     /// const CAPACITY: usize = 3;
     /// let mut array = [0; CAPACITY];
     ///
@@ -62,8 +63,9 @@ mod inner {
     /// If `N` does not equal the array capacity, compilation fails:
     ///
     /// ```rust,compile_fail
-    /// # fn main() {
     /// # use cirkulaer::CircularIndex;
+    /// #
+    /// # fn main() {
     /// let array = [1, 2, 3, 4];
     /// let i = CircularIndex::<5>::zero();
     ///
@@ -74,8 +76,9 @@ mod inner {
     /// If trying to construct an instance with `N` equal to zero, compilation fails:
     ///
     /// ```rust,compile_fail
-    /// # fn main() {
     /// # use cirkulaer::CircularIndex;
+    /// #
+    /// # fn main() {
     /// let _ = CircularIndex::<0>::default(); // Fails to compile.
     /// # }
     /// ```
@@ -100,6 +103,17 @@ mod inner {
         /// Create a new instance with the contained index set to `value`, without checking that
         /// `value` is strictly lesser than [`Self::N`]. If `value` is greater than or equal to
         /// [`Self::N`], the behavior is undefined.
+        ///
+        /// # Examples
+        ///
+        /// ```rust
+        /// # use cirkulaer::CircularIndex;
+        /// #
+        /// # fn main() {
+        /// let i = CircularIndex::<8>::new_unchecked(7);
+        /// assert_eq!(i.get(), 7);
+        /// # }
+        /// ```
         #[must_use]
         pub const fn new_unchecked(value: usize) -> Self {
             const {
@@ -141,8 +155,9 @@ impl<const N: usize> CircularIndex<N> {
     /// # Examples
     ///
     /// ```rust
-    /// # fn main() {
     /// # use cirkulaer::CircularIndex;
+    /// #
+    /// # fn main() {
     /// assert_eq!(CircularIndex::<8>::N, 8);
     /// # }
     /// ```
@@ -181,6 +196,16 @@ impl<const N: usize> CircularIndex<N> {
     }
 
     /// Create an instance with the index set to zero.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use cirkulaer::CircularIndex;
+    /// #
+    /// # fn main() {
+    /// let i = CircularIndex::<6>::zero();
+    /// assert_eq!(i.get(), 0);
+    /// # }
     #[must_use]
     pub const fn zero() -> Self {
         Self::new_unchecked(0)
@@ -246,6 +271,16 @@ mod value_error_tests {
 // The `Default` trait is manually implemented to ensure that `N` cannot equal zero.
 impl<const N: usize> Default for CircularIndex<N> {
     /// Create an instance with the index set to zero.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use cirkulaer::CircularIndex;
+    /// #
+    /// # fn main() {
+    /// let i = CircularIndex::<5>::default();
+    /// assert_eq!(i.get(), 0);
+    /// # }
     fn default() -> Self {
         Self::zero()
     }
