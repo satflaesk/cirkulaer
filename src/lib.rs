@@ -3,8 +3,6 @@
 
 use std::ops::{Add, AddAssign, Index, IndexMut, Sub, SubAssign};
 
-/// A module whose purpose is to reduce the risk of the invariants of [`CircularIndex`] being
-/// violated.
 mod inner {
     /// A circular index type for circularly indexing into primitive, fixed-size
     /// [arrays](https://doc.rust-lang.org/std/primitive.array.html).
@@ -84,18 +82,10 @@ mod inner {
     /// ```
     #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
     pub struct CircularIndex<const N: usize> {
-        /// The contained index.
         value: usize,
-
-        /// A private field whose purpose is to prevent [`CircularIndex`] from being constructed
-        /// using `CircularIndex { ... }` struct literal syntax outside of the
-        /// [`inner`](super::inner) module; its presence also forces code outside of
-        /// [`inner`](super::inner) to access the [`value`](CircularIndex::value) field via the
-        /// [`get`](CircularIndex::get) function.
         _seal: Seal,
     }
 
-    /// A zero-sized type private to the [`inner`](super::inner) module.
     #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
     struct Seal;
 
@@ -216,11 +206,7 @@ impl<const N: usize> CircularIndex<N> {
 /// the provided value not being strictly lesser than `N` in `CircularIndex<N>`.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct ValueError {
-    /// The value of the `N` const-generic of the particular [`CircularIndex`] type that was
-    /// attempted to be constructed.
     n: usize,
-
-    /// The erroneous value provided to the [`CircularIndex::new`] constructor.
     value: usize,
 }
 
