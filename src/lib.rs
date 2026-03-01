@@ -167,7 +167,7 @@ impl<const N: usize> CircularIndex<N> {
     }
 
     /// Create a ciruclar index with the contained index set to `value`, *without* checking whether
-    /// `value` is strictly lesser than `N`. If `value` is greater than or equal to `N`, the
+    /// `value` is strictly lesser than `N`. If `value` is not strictly lesser than `N`, the
     /// behavior is *undefined*.
     ///
     /// # Examples
@@ -180,13 +180,27 @@ impl<const N: usize> CircularIndex<N> {
     /// assert_eq!(i.get(), 1);
     /// # }
     /// ```
+    ///
+    /// # Panics
+    ///
+    /// In *debug* mode, panics if `value` is not strictly lesser than `N`.
+    ///
+    /// # Safety
+    ///
+    /// `value` must be strictly lesser than `N`.
     #[must_use]
     pub const fn new_unchecked(value: usize) -> Self {
         const {
-            assert!(N != 0, "`N` cannot be zero");
+            assert!(
+                N != 0,
+                "the compile-time constant `N` of `CircularIndex` cannot be zero",
+            );
         }
 
-        debug_assert!(value < Self::N);
+        debug_assert!(
+            value < Self::N,
+            "the value given to `CircularIndex::<N>::new_unchecked` must be strictly lesser than `N`",
+        );
 
         Self { value }
     }
@@ -523,7 +537,9 @@ mod circular_index_tests {
     use super::*;
 
     #[cfg(debug_assertions)]
-    #[should_panic]
+    #[should_panic(
+        expected = "the value given to `CircularIndex::<N>::new_unchecked` must be strictly lesser than `N`"
+    )]
     #[test]
     fn new_unchecked_panics_if_given_a_value_not_strictly_lesser_than_n() {
         let _ = CircularIndex::<7>::new_unchecked(7);
