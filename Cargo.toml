@@ -17,7 +17,7 @@ broken_intra_doc_links = "deny"
 
 [package]
 categories = ["rust-patterns"]
-description = "Provides a circular index type."
+description = "Provides a circular index type for circular indexing into primitive, fixed-size arrays."
 edition = "2024"
 keywords = ["array", "circular", "index", "indices"]
 license = "MIT OR Apache-2.0"
