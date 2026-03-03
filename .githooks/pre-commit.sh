@@ -12,7 +12,9 @@ set -eoux pipefail;
 repo_root=$(git rev-parse --show-toplevel);
 pushd "${repo_root}/scripts";
 
-./build-all-targets.sh;
+./build-all-targets.sh
+./build-all-targets.sh --no-default-features
+./build-all-targets.sh --no-default-features --features std
 
 ./check-coverage.sh;
 ./check-formatting.sh;

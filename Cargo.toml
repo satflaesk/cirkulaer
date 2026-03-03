@@ -6,6 +6,10 @@ harness = false
 criterion = "0.8.2"
 rand = "0.10.0"
 
+[features]
+default = ["std"]
+std = []
+
 [lints.clippy]
 all = "deny"
 cargo = "deny"

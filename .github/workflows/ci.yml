@@ -14,6 +14,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - run: ./scripts/build-all-targets.sh --verbose
+    - run: ./scripts/build-all-targets.sh --verbose --no-default-features
+    - run: ./scripts/build-all-targets.sh --verbose --no-default-features --features std
 
   check-coverage:
     name: Check coverage
