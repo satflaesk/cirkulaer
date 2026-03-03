@@ -1,7 +1,10 @@
+#![cfg_attr(not(test), no_std)]
 #![deny(missing_docs)]
 #![doc = include_str!("../README.md")]
 
-use std::ops::{Add, AddAssign, Index, IndexMut, Sub, SubAssign};
+use core::error::Error;
+use core::fmt::{self, Display, Formatter};
+use core::ops::{Add, AddAssign, Index, IndexMut, Sub, SubAssign};
 
 /// A circular index for circular indexing into primitive, fixed-size [`array`]s.
 ///
@@ -231,8 +234,8 @@ pub struct ValueError {
     value: usize,
 }
 
-impl std::fmt::Display for ValueError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+impl Display for ValueError {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         write!(
             f,
             "cannot create a circular index with `N` equal to {n} from a value of {value}",
@@ -242,7 +245,7 @@ impl std::fmt::Display for ValueError {
     }
 }
 
-impl std::error::Error for ValueError {}
+impl Error for ValueError {}
 
 #[cfg(test)]
 mod value_error_tests {
@@ -526,8 +529,8 @@ impl<T, const N: usize> IndexMut<CircularIndex<N>> for [T; N] {
     }
 }
 
-impl<const N: usize> std::fmt::Display for CircularIndex<N> {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+impl<const N: usize> Display for CircularIndex<N> {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         write!(f, "{value} (N={n})", value = self.get(), n = Self::N)
     }
 }
@@ -535,6 +538,7 @@ impl<const N: usize> std::fmt::Display for CircularIndex<N> {
 #[cfg(test)]
 mod circular_index_tests {
     use super::*;
+    use core::mem::size_of;
 
     #[cfg(debug_assertions)]
     #[should_panic(
@@ -547,17 +551,14 @@ mod circular_index_tests {
 
     #[test]
     fn is_of_the_same_size_as_usize() {
-        assert_eq!(
-            std::mem::size_of::<CircularIndex::<9>>(),
-            std::mem::size_of::<usize>(),
-        );
+        assert_eq!(size_of::<CircularIndex::<9>>(), size_of::<usize>(),);
     }
 
     #[test]
     fn n_does_not_affect_the_size() {
         assert_eq!(
-            std::mem::size_of::<CircularIndex::<2>>(),
-            std::mem::size_of::<CircularIndex::<8>>(),
+            size_of::<CircularIndex::<2>>(),
+            size_of::<CircularIndex::<8>>(),
         );
     }
 
