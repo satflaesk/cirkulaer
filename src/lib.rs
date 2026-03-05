@@ -58,6 +58,27 @@ use core::ops::{Add, AddAssign, Index, IndexMut, Sub, SubAssign};
 /// # }
 /// ```
 ///
+/// More formally, addition and subtraction behave as follows:
+///
+/// ```rust
+/// # use cirkulaer::{CircularIndex, ValueError};
+/// #
+/// # fn main() -> Result<(), ValueError> {
+/// const N: usize = 7;
+/// let lhs = CircularIndex::<N>::new(3)?;
+/// let rhs = 12;
+///
+/// let sum = lhs + rhs;
+/// // Assuming that `lhs.get() + rhs` doesn't overflow, this holds:
+/// assert_eq!(sum.get(), (lhs.get() + rhs) % N);
+///
+/// let difference = lhs - rhs;
+/// // Assuming that `lhs.get() + N` doesn't overflow, this holds:
+/// assert_eq!(difference.get(), (lhs.get() + N - (rhs % N)) % N);
+/// #     Ok(())
+/// # }
+/// ```
+///
 /// Addition is guaranteed not to overflow; subtraction not to underflow:
 ///
 /// ```rust
@@ -89,8 +110,8 @@ use core::ops::{Add, AddAssign, Index, IndexMut, Sub, SubAssign};
 /// # }
 /// ```
 ///
-/// Naturally, the contained index must be strictly lesser than `N`, implying that `N` cannot be
-/// zero. Attempts to create a circular index with `N` equal to zero fail to compile:
+/// Naturally, the contained index must be strictly lesser than `N`, hence `N` cannot be zero.
+/// Attempts to create a circular index with `N` equal to zero fail to compile:
 ///
 /// ```rust,compile_fail
 /// # use cirkulaer::CircularIndex;
