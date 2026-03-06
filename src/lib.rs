@@ -550,12 +550,6 @@ impl<T, const N: usize> IndexMut<CircularIndex<N>> for [T; N] {
     }
 }
 
-impl<const N: usize> Display for CircularIndex<N> {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(f, "{value} (N={n})", value = self.get(), n = Self::N)
-    }
-}
-
 #[cfg(test)]
 mod circular_index_tests {
     use super::*;
@@ -581,13 +575,6 @@ mod circular_index_tests {
             size_of::<CircularIndex::<2>>(),
             size_of::<CircularIndex::<8>>(),
         );
-    }
-
-    #[test]
-    fn the_display_trait_implementation_works_as_intended() {
-        let i = CircularIndex::<5>::new(3).unwrap();
-
-        assert_eq!(i.to_string(), "3 (N=5)");
     }
 
     #[test]
