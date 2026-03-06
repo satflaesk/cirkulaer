@@ -6,7 +6,7 @@ use core::error::Error;
 use core::fmt::{self, Display, Formatter};
 use core::ops::{Add, AddAssign, Index, IndexMut, Sub, SubAssign};
 
-/// A circular index for circular indexing into primitive, fixed-size [`array`]s.
+/// A circular index for circular indexing into primitive, fixed-size [arrays](array).
 ///
 /// The compile-time constant `N` corresponds to the array size `N` in `[T; N]`.
 ///
