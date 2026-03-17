@@ -24,6 +24,7 @@ pushd "${repo_root}/scripts";
 ./run-all-examples.sh;
 ./run-all-tests-under-miri.sh;
 ./run-all-tests.sh;
+./run-all-tests.sh --release;
 ./run-clippy.sh;
 
 ./run-all-benchmarks.sh;

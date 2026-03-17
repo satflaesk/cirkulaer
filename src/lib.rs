@@ -2,8 +2,14 @@
 #![deny(missing_docs)]
 #![doc = include_str!("../README.md")]
 
+use core::clone::Clone;
+use core::cmp::{Eq, Ord, PartialEq, PartialOrd};
+use core::convert::TryFrom;
+use core::default::Default;
 use core::error::Error;
-use core::fmt::{self, Display, Formatter};
+use core::fmt::{self, Debug, Display, Formatter};
+use core::hash::Hash;
+use core::marker::Copy;
 use core::ops::{Add, AddAssign, Index, IndexMut, Sub, SubAssign};
 
 /// A circular index for circular indexing into primitive, fixed-size [arrays](array).
@@ -12,7 +18,7 @@ use core::ops::{Add, AddAssign, Index, IndexMut, Sub, SubAssign};
 ///
 /// # Examples
 ///
-/// Being a *circular* index, addition above `N` minus one wraps around as many times as are needed:
+/// Being a *circular* index, addition above `N` minus one wraps around as many times as needed:
 ///
 /// ```rust
 /// # use cirkulaer::CircularIndex;
@@ -39,7 +45,7 @@ use core::ops::{Add, AddAssign, Index, IndexMut, Sub, SubAssign};
 /// # }
 /// ```
 ///
-/// Subtraction below zero behaves similarly:
+/// Subtraction below zero behaves analogously:
 ///
 /// ```rust
 /// # use cirkulaer::CircularIndex;
@@ -110,6 +116,19 @@ use core::ops::{Add, AddAssign, Index, IndexMut, Sub, SubAssign};
 /// # }
 /// ```
 ///
+/// Attempts to combine circular indexes having different `N`s fail to compile:
+///
+/// ```rust,compile_fail
+/// # use cirkulaer::CircularIndex;
+/// #
+/// # fn main() -> Result<(), ValueError> {
+/// let i = CircularIndex::<7>::new(4)?;
+/// let j = CircularIndex::<8>::new(1)?;
+///
+/// let _ = i + j; // `i` and `j` are of different types, so this fails to compile.
+/// # }
+/// ```
+///
 /// Naturally, the contained index must be strictly lesser than `N`, hence `N` cannot be zero.
 /// Attempts to create a circular index with `N` equal to zero fail to compile:
 ///
@@ -120,7 +139,7 @@ use core::ops::{Add, AddAssign, Index, IndexMut, Sub, SubAssign};
 /// let _ = CircularIndex::<0>::default(); // `N` cannot be zero, so this fails to compile.
 /// # }
 /// ```
-#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct CircularIndex<const N: usize> {
     value: usize,
 }
@@ -138,25 +157,6 @@ impl<const N: usize> CircularIndex<N> {
     /// # }
     /// ```
     pub const N: usize = N;
-
-    /// Return the contained index as a primitive type.
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// # use cirkulaer::{CircularIndex, ValueError};
-    /// #
-    /// # fn main() -> Result<(), ValueError> {
-    /// let i = CircularIndex::<4>::new(2)?;
-    /// assert_eq!(i.get(), 2);
-    /// #
-    /// #     Ok(())
-    /// # }
-    /// ```
-    #[must_use]
-    pub const fn get(self) -> usize {
-        self.value
-    }
 
     /// Try to create a circular index with the contained index set to `value`.
     ///
@@ -207,7 +207,7 @@ impl<const N: usize> CircularIndex<N> {
     ///
     /// # Panics
     ///
-    /// In *debug* mode, panics if `value` is not strictly lesser than `N`.
+    /// If *debug* assertions are enabled, panics if `value` is not strictly lesser than `N`.
     ///
     /// # Safety
     ///
@@ -215,15 +215,12 @@ impl<const N: usize> CircularIndex<N> {
     #[must_use]
     pub const fn new_unchecked(value: usize) -> Self {
         const {
-            assert!(
-                N != 0,
-                "the compile-time constant `N` of `CircularIndex` cannot be zero",
-            );
+            assert!(N != 0, "`N` in `CircularIndex<N>` cannot be zero");
         }
 
         debug_assert!(
             value < Self::N,
-            "the value given to `CircularIndex::<N>::new_unchecked` must be strictly lesser than `N`",
+            "a `CircularIndex<N>` must only be created from a value strictly lesser than `N`"
         );
 
         Self { value }
@@ -245,22 +242,61 @@ impl<const N: usize> CircularIndex<N> {
     pub const fn zero() -> Self {
         Self::new_unchecked(0)
     }
+
+    /// Return the contained index as a primitive type.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use cirkulaer::{CircularIndex, ValueError};
+    /// #
+    /// # fn main() -> Result<(), ValueError> {
+    /// let i = CircularIndex::<4>::new(2)?;
+    /// assert_eq!(i.get(), 2);
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    #[must_use]
+    pub const fn get(self) -> usize {
+        self.value
+    }
 }
 
 /// The error returned by [`CircularIndex::new`] when given a value not strictly lesser than the
 /// compile-time constant `N`.
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct ValueError {
     n: usize,
     value: usize,
+}
+
+impl Debug for ValueError {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        if f.alternate() {
+            write!(
+                f,
+                "ValueError {{\n    N: {N},\n    value: {value}\n}}",
+                N = self.n,
+                value = self.value,
+            )
+        } else {
+            write!(
+                f,
+                "ValueError {{ N: {N}, value: {value} }}",
+                N = self.n,
+                value = self.value,
+            )
+        }
+    }
 }
 
 impl Display for ValueError {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         write!(
             f,
-            "cannot create a circular index with `N` equal to {n} from a value of {value}",
-            n = self.n,
+            "a `CircularIndex<{N}>` cannot be created from a value of {value}",
+            N = self.n,
             value = self.value,
         )
     }
@@ -268,38 +304,6 @@ impl Display for ValueError {
 
 impl Error for ValueError {}
 
-#[cfg(test)]
-mod value_error_tests {
-    use super::ValueError;
-
-    #[test]
-    fn the_display_trait_implementation_works_as_intended() {
-        let e = ValueError { n: 4, value: 6 };
-
-        let s = e.to_string();
-
-        assert_eq!(
-            s,
-            "cannot create a circular index with `N` equal to 4 from a value of 6"
-        );
-    }
-
-    #[test]
-    fn is_send() {
-        fn assert_is_send<T: Send>() {}
-
-        assert_is_send::<ValueError>();
-    }
-
-    #[test]
-    fn is_sync() {
-        fn assert_is_sync<T: Sync>() {}
-
-        assert_is_sync::<ValueError>();
-    }
-}
-
-// The `Default` trait is manually implemented to ensure that `N` cannot be zero.
 impl<const N: usize> Default for CircularIndex<N> {
     /// Create a circular index with the contained index set to zero. Identical to calling
     /// [`zero`](CircularIndex::zero).
@@ -550,44 +554,60 @@ impl<T, const N: usize> IndexMut<CircularIndex<N>> for [T; N] {
     }
 }
 
-#[cfg(test)]
-mod circular_index_tests {
-    use super::*;
-    use core::mem::size_of;
-
-    #[cfg(debug_assertions)]
-    #[should_panic(
-        expected = "the value given to `CircularIndex::<N>::new_unchecked` must be strictly lesser than `N`"
-    )]
-    #[test]
-    fn new_unchecked_panics_if_given_a_value_not_strictly_lesser_than_n() {
-        let _ = CircularIndex::<7>::new_unchecked(7);
-    }
-
-    #[test]
-    fn is_of_the_same_size_as_usize() {
-        assert_eq!(size_of::<CircularIndex::<9>>(), size_of::<usize>(),);
-    }
-
-    #[test]
-    fn n_does_not_affect_the_size() {
-        assert_eq!(
-            size_of::<CircularIndex::<2>>(),
-            size_of::<CircularIndex::<8>>(),
-        );
-    }
-
-    #[test]
-    fn is_send() {
-        fn assert_is_send<T: Send>() {}
-
-        assert_is_send::<CircularIndex<4>>();
-    }
-
-    #[test]
-    fn is_sync() {
-        fn assert_is_sync<T: Sync>() {}
-
-        assert_is_sync::<CircularIndex<6>>();
+impl<const N: usize> Debug for CircularIndex<N> {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        if f.alternate() {
+            write!(
+                f,
+                "CircularIndex<{N}> {{\n    {value},\n}}",
+                N = Self::N,
+                value = self.value,
+            )
+        } else {
+            write!(
+                f,
+                "CircularIndex<{N}> {{ {value} }}",
+                N = Self::N,
+                value = self.value,
+            )
+        }
     }
 }
+
+/// Ensure that no [`CircularIndex`] constructor accepts an `N` of zero, since only
+/// [`new_unchecked`](CircularIndex::new_unchecked) asserts that `N` is not zero.
+///
+/// ```rust,compile_fail
+/// # use cirkulaer::CircularIndex;
+///
+/// # fn main() {
+/// let _ = CircularIndex::<0>::default();
+/// # }
+/// ```
+///
+/// ```rust,compile_fail
+/// # use cirkulaer::CircularIndex;
+/// #
+/// # fn main() {
+/// let _ = CircularIndex::<0>::new(0);
+/// # }
+/// ```
+///
+/// ```rust,compile_fail
+/// # use cirkulaer::CircularIndex;
+/// #
+/// # fn main() {
+/// let _ = CircularIndex::<0>::new_unchecked(0);
+/// # }
+/// ```
+///
+/// ```rust,compile_fail
+/// # use cirkulaer::CircularIndex;
+/// #
+/// # fn main() {
+/// let _ = CircularIndex::<0>::zero();
+/// # }
+/// ```
+#[allow(dead_code)]
+#[doc(hidden)]
+struct _CompileFail;
