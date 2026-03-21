@@ -1,12 +1,5 @@
 #!/usr/bin/env bash
 
-# To automatically run this script before a commit can be created, navigate to the root directory of
-# the repository and issue the following sequence of commands:
-#
-# $ mkdir --parents .git/hooks
-# $ cd .git/hooks
-# $ ln --interactive --symbolic ../../.githooks/pre-commit.sh pre-commit
-
 set -eoux pipefail;
 
 repo_root=$(git rev-parse --show-toplevel);
