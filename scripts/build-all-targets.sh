@@ -2,4 +2,4 @@
 
 set -eoux pipefail;
 
-cargo build --all-targets "${@}";
+RUSTFLAGS="-D warnings" cargo build --all-targets "${@}";

@@ -16,9 +16,6 @@ cargo = "deny"
 nursery = "deny"
 pedantic = "deny"
 
-[lints.rustdoc]
-broken_intra_doc_links = "deny"
-
 [package]
 categories = ["rust-patterns"]
 description = "Provides a circular index type for circular indexing into primitive, fixed-size arrays"
