@@ -9,9 +9,9 @@ pushd "${repo_root}/scripts";
 ./build-all-targets.sh --no-default-features
 ./build-all-targets.sh --no-default-features --features std
 
-./check-coverage.sh;
 ./check-formatting.sh;
 ./generate-documentation.sh;
+./measure-code-coverage.sh;
 ./run-all-examples-under-miri.sh;
 ./run-all-examples.sh;
 ./run-all-tests-under-miri.sh;
