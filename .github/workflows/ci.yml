@@ -14,14 +14,6 @@ jobs:
     - run: ./scripts/build-all-targets.sh --verbose --no-default-features
     - run: ./scripts/build-all-targets.sh --verbose --no-default-features --features std
 
-  check-coverage:
-    name: Check coverage
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v5
-    - uses: taiki-e/install-action@cargo-llvm-cov
-    - run: ./scripts/check-coverage.sh --verbose
-
   check-formatting:
     name: Check formatting
     runs-on: ubuntu-latest
@@ -36,6 +28,14 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - run: ./scripts/generate-documentation.sh --verbose
+
+  measure-code-coverage:
+    name: Measure code coverage
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: taiki-e/install-action@cargo-llvm-cov
+    - run: ./scripts/measure-code-coverage.sh --verbose
 
   run-all-examples-under-miri:
     name: Run all examples under Miri
